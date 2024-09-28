@@ -25,7 +25,7 @@ namespace NuzlockeSoulLinkClassLibrary
 
             using (IDbConnection connection = new SqlConnection(connectionString))
             {
-                var data = await connection.QueryAsync<T>(sql, parameters);
+                var data = await connection.QueryAsync<T>(sql, parameters, commandType: CommandType.StoredProcedure);
 
                 return data.ToList();
             }
@@ -37,7 +37,7 @@ namespace NuzlockeSoulLinkClassLibrary
 
             using (IDbConnection connection = new SqlConnection(connectionString))
             {
-                await connection.ExecuteAsync(sql, parameters);
+                await connection.ExecuteAsync(sql, parameters, commandType: CommandType.StoredProcedure);
             }
         }
     }

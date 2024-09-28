@@ -1,0 +1,45 @@
+﻿@page "/leaderboard"
+@inject PlayerAccount playerAccount
+@inject LeaderboardData leaderboardData
+
+@if (playerAccount.Username != null)
+{
+    <div class="pkmn-accent-body">
+        <table class="table pkmn-table-body w-100 m-auto mt-0">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Num of Completed Runs</th>
+                </tr>
+            </thead>
+            @if (leaderboardUsers.Any())
+            {
+                <tbody class="pkmn-leaderboard-body">
+                    @foreach (var user in leaderboardUsers)
+                    {
+                        <tr>
+                            <td>@user.Username</td>
+                            <td>@user.CompletedRuns</td>
+                        </tr>
+                    }
+                </tbody>
+            }
+        </table>
+    </div>
+}
+else
+{
+    <NotLoggedIn />
+}
+
+@code {
+    List<LeaderboardModel> leaderboardUsers = new List<LeaderboardModel>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (playerAccount.Username != null)
+        {
+            leaderboardUsers = await leaderboardData.GetLeaderboardUsers();
+        }
+    }
+}

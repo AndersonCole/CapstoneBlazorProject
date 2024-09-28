@@ -1,0 +1,71 @@
+﻿@page "/register"
+@inject PlayerData playerData
+@inject NavigationManager Navigation
+@inject PlayerAccount playerAccount
+
+<div class="p-1 pkmn-accent-body">
+    <EditForm Model="newPlayer" OnValidSubmit="RegisterPlayer" autocomplete="off" class="m-4">
+        <DataAnnotationsValidator />
+        <h3>Register</h3>
+
+        <div class="form-group row">
+            <label for="userName">Username: </label>
+            <InputText id="userName" @bind-Value="newPlayer.Username" class="pkmn-fields col-sm-2 ms-2" />
+        </div>
+
+        <div class="form-group row">
+            <label for="password">Password: </label>
+            <InputText id="password" @bind-Value="newPlayer.Password" class="pkmn-fields col-sm-2 ms-2" />
+        </div>
+
+        <div class="form-group row">
+            <label for="confirmPassword">Confirm Password: </label>
+            <InputText id="confirmPassword" @bind-Value="newPlayer.ConfirmPassword" class="pkmn-fields col-sm-2 ms-2" />
+        </div>
+
+        <div class="row">
+            @if (errorText != null)
+            {
+                <ul>
+                    <li class="pkmn-error-txt">@errorText</li>
+                </ul>
+            }
+
+            <ValidationSummary />
+        </div>
+
+        <button type="submit" class="btn pkmn-form-btn mt-3">Register</button>
+    </EditForm>
+</div>
+
+@code {
+    private PlayerRegistrationModel newPlayer = new PlayerRegistrationModel();
+
+    private string? errorText;
+
+    private async Task RegisterPlayer()
+    {
+
+        bool isDuplicate = await playerData.CheckDuplicateUsername(newPlayer.Username);
+
+        if (!isDuplicate)
+        {
+            PlayerModel player = new PlayerModel
+            {
+                Username = newPlayer.Username,
+                Password = newPlayer.Password,
+                CreatedDate = DateTimeOffset.Now
+            };
+
+            var registeredPlayer = await playerData.RegisterNewPlayer(player);
+
+            playerAccount.UpdateAccountInfo(registeredPlayer);
+
+            Navigation.NavigateTo("");
+        }
+        else
+        {
+            errorText = "That username is already taken!";
+        }
+    }
+}

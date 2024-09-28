@@ -1,6 +1,8 @@
 using CapstoneNuzlockeSoulLinkTracker.Components;
 using NuzlockeSoulLinkClassLibrary;
 
+Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -9,7 +11,11 @@ builder.Services.AddRazorComponents()
 
 //TODO: add all services here
 builder.Services.AddTransient<ISqlAccess, SqlAccess>();
-builder.Services.AddSingleton<PokemonData>();
+builder.Services.AddScoped<PlayerAccount>();
+builder.Services.AddScoped<PokemonData>();
+builder.Services.AddScoped<PlayerData>();
+builder.Services.AddScoped<ActiveRunsData>();
+builder.Services.AddScoped<LeaderboardData>();
 
 var app = builder.Build();
 

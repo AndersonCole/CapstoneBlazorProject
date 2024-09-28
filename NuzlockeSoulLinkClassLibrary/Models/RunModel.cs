@@ -6,10 +6,13 @@ using System.Threading.Tasks;
 
 namespace NuzlockeSoulLinkClassLibrary.Models
 {
-    public class RunsModel
+    public class RunModel
     {
         public int RunId { get; set; }
+        public int GameId { get; set; }
+        public string GameName { get; set; }
         public int RunCreatorId { get; set; }
+        public string RunCreatorName { get; set; }
         public string RunName { get; set; }
         public string RunPassword { get; set; }
         public string RunDescription { get; set; }

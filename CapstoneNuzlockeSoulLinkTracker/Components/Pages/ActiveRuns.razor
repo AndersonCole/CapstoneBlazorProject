@@ -1,0 +1,89 @@
+﻿@page "/"
+@inject PlayerAccount playerAccount
+@inject ActiveRunsData activeRunsData
+
+@if (playerAccount.Username != null && generations.Any())
+{
+    <div class="pkmn-accent-body">
+        <div class="btn-group d-flex w-100 p-0 m-0" role="group">
+            <button class="btn flex-fill @(allGensSelected ? "pkmn-gen-btn-selected" : "pkmn-gen-btn")" @onclick="SelectAllGens">All</button>
+            @foreach(var generation in generations)
+            {
+                <button class="btn flex-fill @(generation == selectedGeneration ? "pkmn-gen-btn-selected" : "pkmn-gen-btn")" @onclick="() => SelectGeneration(generation)">Gen @generation.RomanNumeral</button>
+            }
+        </div>
+        <div class="row">
+            <div class="col-10"></div>
+            <button class="pkmn-gen-btn col-1 mt-2 float-end">New Run</button>
+        </div>
+        <table class="table pkmn-table-body m-auto mt-2">
+            <thead>
+                <tr class="text-center">
+                    <th>Creator</th>
+                    <th>Run Name</th>
+                    <th>Game Name</th>
+                    <th></th>
+                </tr>
+            </thead>
+            @if (runs.Any())
+            {
+                <tbody>
+                    @foreach(var run in runs)
+                    {
+                        <tr class="text-center">
+                            <td>@run.RunCreatorName</td>
+                            <td>@run.RunName</td>
+                            <td>@run.GameName</td>
+                            <td>
+                                <button class="pkmn-form-btn">+ JOIN</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            }
+        </table>
+    </div>
+
+}
+else
+{
+    <NotLoggedIn />
+}
+
+@code {
+    List<GenerationModel> generations = new List<GenerationModel>();
+    List<RunModel> runs = new List<RunModel>();
+
+    bool allGensSelected = true;
+
+    GenerationModel selectedGeneration;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (playerAccount.Username != null)
+        {
+            generations = await activeRunsData.GetGenerations();
+            runs = await activeRunsData.GetOngoingRuns();
+        }
+    }
+
+    private async Task SelectGeneration(GenerationModel generation)
+    {
+        allGensSelected = false;
+        selectedGeneration = generation;
+        runs = new List<RunModel>();
+        runs = await activeRunsData.GetOngoingRunsByGen(generation.GenId);
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task SelectAllGens()
+    {
+        allGensSelected = true;
+        selectedGeneration = null;
+        runs = new List<RunModel>();
+        runs = await activeRunsData.GetOngoingRuns();
+
+        await InvokeAsync(StateHasChanged);
+    }
+}

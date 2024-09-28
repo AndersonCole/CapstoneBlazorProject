@@ -1,0 +1,56 @@
+﻿@page "/login"
+@inject PlayerData playerData
+@inject NavigationManager Navigation
+@inject PlayerAccount playerAccount
+
+<div class="p-1 pkmn-accent-body">
+    <EditForm Model="returningPlayer" OnValidSubmit="LoginPlayer" autocomplete="off" class="m-4">
+        <DataAnnotationsValidator />
+        <h3>Login</h3>
+
+        <div class="form-group row">
+            <label for="userName">Username: </label>
+            <InputText id="userName" @bind-Value="returningPlayer.Username" class="pkmn-fields col-sm-2 ms-2" />
+        </div>
+
+        <div class="form-group row">
+            <label for="password">Password: </label>
+            <InputText id="password" @bind-Value="returningPlayer.Password" class="pkmn-fields col-sm-2 ms-2" />
+        </div>
+
+        <div class="row">
+            @if (errorText != null)
+            {
+                <ul>
+                    <li class="pkmn-error-txt">@errorText</li>
+                </ul>
+            }
+
+            <ValidationSummary />
+        </div>
+
+        <button type="submit" class="btn pkmn-form-btn mt-3">Login</button>
+    </EditForm>
+</div>
+
+@code {
+    private PlayerLoginModel returningPlayer = new PlayerLoginModel();
+
+    private string? errorText;
+
+    private async Task LoginPlayer()
+    {
+        var player = await playerData.LoginReturningPlayer(returningPlayer.Username, returningPlayer.Password);
+
+        if(player != null)
+        {
+            playerAccount.UpdateAccountInfo(player);
+
+            Navigation.NavigateTo("");
+        }
+        else
+        {
+            errorText = "Username or password was incorrect!";
+        }
+    }
+}

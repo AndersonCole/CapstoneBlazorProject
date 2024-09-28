@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace NuzlockeSoulLinkClassLibrary.Models
 {
-    public class GamesModel
+    public class GameModel
     {
         public int GameId { get; set; }
         public int GenId { get; set; }
