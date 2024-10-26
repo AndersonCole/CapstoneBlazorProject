@@ -1,4 +1,8 @@
-﻿<div class="justify-content-between">
+﻿@inject PlayerAccount playerAccount
+@inject NavigationManager Navigation
+@inject NavMenuData navMenuData
+
+<div class="justify-content-between">
     <nav class="flex-column">
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
@@ -11,5 +15,27 @@
                 @* <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> *@ Leaderboard
             </NavLink>
         </div>
+
+        @if (runs.Any())
+        {
+            @foreach (var run in runs)
+            {
+                <div class="nav-item px-3">
+                    <NavLink class="nav-link" href="@($"run/{run.RunId}")">@run.RunName</NavLink>
+                </div>
+            }
+        }
     </nav>
 </div>
+
+@code {
+    List<RunModel> runs = new List<RunModel>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (playerAccount.Username != null)
+        {
+            runs = await navMenuData.GetRunsFromPlayerId(playerAccount.Id);
+        }
+    }
+}

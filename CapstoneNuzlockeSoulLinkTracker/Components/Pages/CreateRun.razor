@@ -1,0 +1,143 @@
+﻿@page "/create"
+@inject PlayerAccount playerAccount
+@inject NavigationManager Navigation
+@inject CreateRunsData createRunsData
+
+@if (playerAccount.Username != null)
+{
+    <div class="p-1 pkmn-accent-body">
+        <EditForm Model="newRun" OnValidSubmit="CreateNewRun" autocomplete="off" class="m-4">
+            <DataAnnotationsValidator />
+            <h3>Create New Run</h3>
+
+            <div class="form-group row">
+                <label for="runName">Run Name: </label>
+                <InputText id="runName" @bind-Value="newRun.Name" class="pkmn-fields col-sm-2 ms-2" />
+            </div>
+
+            <div class="form-group row">
+                <label for="runDesc">Run Description: </label>
+                <InputTextArea id="runDesc" @bind-Value="newRun.Description" class="pkmn-fields col-sm-2 ms-2" />
+            </div>
+
+            <div class="form-group row">
+                <label for="gens">Gen: </label>
+                <InputSelect id="gens" @bind-Value="selectedGen" class="pkmn-fields col-sm-2 ms-2" >
+                    @if (generations.Any())
+                    {
+                        <option value="">-</option>
+                        @foreach(var gen in generations)
+                        {
+                            <option value="@gen.GenId">Gen @gen.RomanNumeral</option>
+                        }
+                    }
+                </InputSelect>
+            </div>
+
+            <div class="form-group row">
+                <label for="games">Game: </label>
+                <InputSelect id="games" @bind-Value="newRun.GameId" class="pkmn-fields col-sm-2 ms-2">
+                    @if (games.Any() && selectedGen != null)
+                    {
+                        <option value="">-</option>
+                        @foreach (var game in games)
+                        {
+                            if(game.GenId == selectedGen)
+                            {
+                                <option value="@game.GameId">@game.GameName</option>
+                            }
+                        }
+                    }
+                    else
+                    {
+                        <option value="">Select a Generation First!</option>
+                    }
+                </InputSelect>
+            </div>
+
+            <div class="form-group row">
+                <label for="multiplayer">Max Players: </label>
+                <InputSelect id="multiplayer" @bind-Value="newRun.MaxPlayers" class="pkmn-fields">
+                    <option value="">-</option>
+                    <option value="1">Single Player</option>
+                    @for(int i=2;i<5; i++)
+                    {
+                        <option value="@i">@i Players</option>
+                    }
+                </InputSelect>
+            </div>
+
+            <div class="form-group row">
+                <label for="password">Password: </label>
+                <InputText id="password" @bind-Value="newRun.Password" class="pkmn-fields col-sm-2 ms-2" />
+            </div>
+
+            <div class="row">
+                @if (errorText != null)
+                {
+                    <ul>
+                        <li class="pkmn-error-txt">@errorText</li>
+                    </ul>
+                }
+
+                <ValidationSummary />
+            </div>
+
+            <button type="submit" class="btn pkmn-form-btn mt-3">Create</button>
+        </EditForm>
+    </div>
+}
+else
+{
+    <NotLoggedIn />
+}
+
+@code {
+    private RunCreationModel newRun = new RunCreationModel();
+
+    private string? errorText;
+
+    private int? selectedGen = 0;
+
+    List<GenerationModel> generations = new List<GenerationModel>();
+    List<GameModel> games = new List<GameModel>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (playerAccount.Username != null)
+        {
+            generations = await createRunsData.GetGenerations();
+            games = await createRunsData.GetGames();
+        }
+    }
+
+    private async Task CreateNewRun()
+    {
+        bool isDuplicate = await createRunsData.CheckDuplicateName(newRun.Name);
+
+        if (!isDuplicate)
+        {
+            var currentTime = DateTimeOffset.Now;
+
+            RunModel run = new RunModel
+                {
+                    RunName = newRun.Name,
+                    RunDescription = newRun.Description,
+                    RunPassword = newRun.Password,
+                    RunCreatorId = playerAccount.Id,
+                    MaxPlayers = newRun.MaxPlayers,
+                    GameId = newRun.GameId,
+                    CreatedDate = currentTime,
+                    LastUpdated = currentTime
+                };
+
+            var createdRunId = await createRunsData.CreateNewRun(run);
+
+            Navigation.NavigateTo("run/" + createdRunId);
+        }
+        else
+        {
+            errorText = "The name of the run must be unique!";
+        }
+    }
+}

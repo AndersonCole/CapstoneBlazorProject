@@ -1,0 +1,82 @@
+﻿@page "/join/{RunId:int}"
+@inject PlayerAccount playerAccount
+@inject NavigationManager Navigation
+@inject JoinRunsData joinRunsData
+
+@if (playerAccount.Username != null)
+{
+    <div class="p-1 pkmn-accent-body">
+        <EditForm Model="joinRequest" OnValidSubmit="JoinOngoingRun" autocomplete="off" class="m-4">
+            <DataAnnotationsValidator />
+            <h3>Join @run.RunName</h3>
+
+            <div class="form-group row">
+                <label for="runCreator">Creator: </label>
+                <input type="text" id="runCreator" value="@run.RunCreatorName" class="pkmn-fields col-sm-2 ms-2" disabled />
+            </div>
+
+            <div class="form-group row">
+                <label for="gameName">Game: </label>
+                <input type="text" id="gameName" value="@run.GameName" class="pkmn-fields col-sm-2 ms-2" disabled />
+            </div>
+
+            <div class="form-group row">
+                <label for="runDesc">Run Description: </label>
+                <textarea id="runDesc" value="@run.RunDescription" class="pkmn-fields col-sm-2 ms-2" disabled />
+            </div>
+
+            <div class="form-group row mt-3">
+                <label for="password">Password: </label>
+                <InputText id="password" @bind-Value="joinRequest.Password" class="pkmn-fields col-sm-2 ms-2" />
+            </div>
+
+            <div class="row">
+                @if (errorText != null)
+                {
+                    <ul>
+                        <li class="pkmn-error-txt">@errorText</li>
+                    </ul>
+                }
+
+                <ValidationSummary />
+            </div>
+
+            <button type="submit" class="btn pkmn-form-btn mt-3">Join</button>
+        </EditForm>
+    </div>
+}
+else
+{
+    <NotLoggedIn />
+}
+
+@code {
+    [Parameter]
+    public int RunId { get; set; }
+
+    private RunJoinModel joinRequest = new RunJoinModel();
+
+    RunModel run = new RunModel();
+
+    private string? errorText;
+
+    protected override async Task OnInitializedAsync()
+    {
+        run = await joinRunsData.GetRunFromId(RunId);
+    }
+
+    private async Task JoinOngoingRun()
+    {
+        //TODO: Make join run code once runs page is more fleshed out
+        var joinedRun = false;
+
+        if (joinedRun)
+        {
+            Navigation.NavigateTo("/run/" + run.RunId);
+        }
+        else
+        {
+            errorText = "Password to join was incorrect!";
+        }
+    }
+}

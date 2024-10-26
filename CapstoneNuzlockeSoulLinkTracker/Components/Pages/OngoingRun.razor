@@ -1,0 +1,82 @@
+﻿@page "/run/{RunId:int}"
+@inject PlayerAccount playerAccount
+@inject NavigationManager Navigation
+@inject OngoingRunsData ongoingRunsData
+
+@if (playerAccount.Username != null && run != new RunModel())
+{
+    <div class="pkmn-accent-body">
+        <div class="btn-group d-flex p-0 m-0" role="group">
+            <button class="btn flex-fill @(showSinglePlayer ? "pkmn-tab-btn-selected" : "pkmn-tab-btn")" @onclick="() => ChangeShownState(true)">Singleplayer</button>
+            @if(run.MaxPlayers > 1)
+            {
+                <button class="btn flex-fill @(showSinglePlayer ? "pkmn-tab-btn" : "pkmn-tab-btn-selected")" @onclick="() => ChangeShownState(false)">Multiplayer</button>
+            }
+        </div>
+
+        @if (showSinglePlayer)
+        {
+            <div class="row">
+                @if (run.RunProgression.Any())
+                {
+                    <ul>
+                        @foreach(var step in run.RunProgression)
+                        {
+                            @if(step.GetType() == typeof(RouteModel))
+                            {
+                                <li>@((step as RouteModel).RouteName)</li>
+                            }
+                            else if (step.GetType() == typeof(BattleModel))
+                            {
+                                <li>@((step as BattleModel).BattleName)</li>
+                            }
+                        }
+                    </ul>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="row">
+
+            </div>
+        }
+    </div>
+}
+else
+{
+    <NotLoggedIn />
+}
+
+@code {
+    [Parameter]
+    public int RunId { get; set; }
+
+    int runPlayerId;
+
+    bool showSinglePlayer = true;
+
+    RunModel run = new RunModel();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (playerAccount.Username != null)
+        {
+            run = await ongoingRunsData.GetFullRunDetailsFromId(RunId);
+            if(run != null)
+            {
+                runPlayerId = run.RunPlayers.Find(x => x.PlayerId == playerAccount.Id).RunPlayerId;
+            }
+        }
+    }
+
+    private async Task ChangeShownState(bool showSP)
+    {
+        if (showSP)
+            showSinglePlayer = true;
+        else
+            showSinglePlayer = false;
+
+        await InvokeAsync(StateHasChanged);
+    }
+}

@@ -15,7 +15,7 @@
 
         <div class="form-group row">
             <label for="password">Password: </label>
-            <InputText id="password" @bind-Value="returningPlayer.Password" class="pkmn-fields col-sm-2 ms-2" />
+            <InputText id="password" type="password" @bind-Value="returningPlayer.Password" class="pkmn-fields col-sm-2 ms-2" />
         </div>
 
         <div class="row">
@@ -37,6 +37,13 @@
     private PlayerLoginModel returningPlayer = new PlayerLoginModel();
 
     private string? errorText;
+
+    //TODO: Testing code DELETE THIS
+    // protected override async Task OnInitializedAsync()
+    // {
+    //     var battles = await playerData.GetRunBattles(1);
+    //     Console.WriteLine("Hi");
+    // }
 
     private async Task LoginPlayer()
     {

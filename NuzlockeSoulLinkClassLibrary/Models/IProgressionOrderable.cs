@@ -6,8 +6,7 @@ using System.Threading.Tasks;
 
 namespace NuzlockeSoulLinkClassLibrary.Models;
 
-public class GenerationModel
+public interface IProgressionOrderable
 {
-    public int GenId { get; set; }
-    public string RomanNumeral { get; set; }
+    int ProgressionOrder { get; set; }
 }

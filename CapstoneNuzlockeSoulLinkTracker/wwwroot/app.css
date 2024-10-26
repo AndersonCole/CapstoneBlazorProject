@@ -101,14 +101,14 @@ h1:focus {
     border-color: var(--pkmn-dark-black) !important;
 }
 
-.pkmn-gen-btn, .pkmn-gen-btn-selected {
+.pkmn-tab-btn, .pkmn-tab-btn-selected {
+    color: var(--pkmn-light-gray) !important;
     outline: none !important;
     box-shadow: none !important;
     border-radius: 0 !important;
 }
 
-.pkmn-gen-btn {
-    color: var(--pkmn-light-gray) !important;
+.pkmn-tab-btn {
     background: var(--pkmn-dark-black) !important;
 }
 

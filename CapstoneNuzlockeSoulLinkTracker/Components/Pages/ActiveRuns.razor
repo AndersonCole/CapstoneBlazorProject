@@ -1,4 +1,5 @@
 ﻿@page "/"
+@inject NavigationManager Navigation
 @inject PlayerAccount playerAccount
 @inject ActiveRunsData activeRunsData
 
@@ -6,15 +7,15 @@
 {
     <div class="pkmn-accent-body">
         <div class="btn-group d-flex w-100 p-0 m-0" role="group">
-            <button class="btn flex-fill @(allGensSelected ? "pkmn-gen-btn-selected" : "pkmn-gen-btn")" @onclick="SelectAllGens">All</button>
+            <button class="btn flex-fill @(allGensSelected ? "pkmn-tab-btn-selected" : "pkmn-tab-btn")" @onclick="SelectAllGens">All</button>
             @foreach(var generation in generations)
             {
-                <button class="btn flex-fill @(generation == selectedGeneration ? "pkmn-gen-btn-selected" : "pkmn-gen-btn")" @onclick="() => SelectGeneration(generation)">Gen @generation.RomanNumeral</button>
+                <button class="btn flex-fill @(generation == selectedGeneration ? "pkmn-tab-btn-selected" : "pkmn-tab-btn")" @onclick="() => SelectGeneration(generation)">Gen @generation.RomanNumeral</button>
             }
         </div>
         <div class="row">
             <div class="col-10"></div>
-            <button class="pkmn-gen-btn col-1 mt-2 float-end">New Run</button>
+            <button @onclick="NavigateToCreateRun" class="pkmn-gen-btn col-1 mt-2 float-end">New Run</button>
         </div>
         <table class="table pkmn-table-body m-auto mt-2">
             <thead>
@@ -30,14 +31,17 @@
                 <tbody>
                     @foreach(var run in runs)
                     {
-                        <tr class="text-center">
-                            <td>@run.RunCreatorName</td>
-                            <td>@run.RunName</td>
-                            <td>@run.GameName</td>
-                            <td>
-                                <button class="pkmn-form-btn">+ JOIN</button>
-                            </td>
-                        </tr>
+                        @if (run.HasOpenSlots)
+                        {
+                            <tr class="text-center">
+                                <td>@run.RunCreatorName</td>
+                                <td>@run.RunName</td>
+                                <td>@run.GameName</td>
+                                <td>
+                                    <button type="button" @onclick="() => NavigateToJoinRun(run.RunId)" class="pkmn-form-btn">+ JOIN</button>
+                                </td>
+                            </tr>
+                        }
                     }
                 </tbody>
             }
@@ -85,5 +89,15 @@ else
         runs = await activeRunsData.GetOngoingRuns();
 
         await InvokeAsync(StateHasChanged);
+    }
+
+    private void NavigateToCreateRun()
+    {
+        Navigation.NavigateTo("create");
+    }
+
+    private void NavigateToJoinRun(int runId)
+    {
+        Navigation.NavigateTo("join/" + runId);
     }
 }

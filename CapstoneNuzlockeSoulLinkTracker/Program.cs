@@ -1,5 +1,6 @@
 using CapstoneNuzlockeSoulLinkTracker.Components;
-using NuzlockeSoulLinkClassLibrary;
+using NuzlockeSoulLinkClassLibrary.Data;
+using NuzlockeSoulLinkClassLibrary.DataAccess;
 
 Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
 
@@ -12,9 +13,13 @@ builder.Services.AddRazorComponents()
 //TODO: add all services here
 builder.Services.AddTransient<ISqlAccess, SqlAccess>();
 builder.Services.AddScoped<PlayerAccount>();
+builder.Services.AddScoped<NavMenuData>();
 builder.Services.AddScoped<PokemonData>();
 builder.Services.AddScoped<PlayerData>();
 builder.Services.AddScoped<ActiveRunsData>();
+builder.Services.AddScoped<CreateRunsData>();
+builder.Services.AddScoped<JoinRunsData>();
+builder.Services.AddScoped<OngoingRunsData>();
 builder.Services.AddScoped<LeaderboardData>();
 
 var app = builder.Build();

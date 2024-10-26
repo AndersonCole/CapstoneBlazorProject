@@ -4,11 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace NuzlockeSoulLinkClassLibrary.Models
+namespace NuzlockeSoulLinkClassLibrary.Models;
+
+public class LeaderboardModel
 {
-    public class LeaderboardModel
-    {
-        public string Username { get; set; }
-        public int CompletedRuns { get; set; }
-    }
+    public string Username { get; set; }
+    public int CompletedRuns { get; set; }
 }
