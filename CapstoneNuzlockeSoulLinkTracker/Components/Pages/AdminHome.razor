@@ -1,0 +1,26 @@
+﻿@page "/admin"
+@inject PlayerAccount playerAccount
+
+@if (playerAccount.Username != null)
+{
+    @if (playerAccount.IsAdmin)
+    {
+        
+    }
+    else
+    {
+        <div class="col-3"></div>
+        <div class="col-6 h3">
+            You do not have permission to view this page!
+        </div>
+        <div class="col-3"></div>
+    }
+}
+else
+{
+    <NotLoggedIn />
+}
+
+@code {
+    //TODO: have admin page have sub pages within for editing stuff
+}

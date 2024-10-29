@@ -59,9 +59,15 @@
 
             var registeredPlayer = await playerData.RegisterNewPlayer(player);
 
-            playerAccount.UpdateAccountInfo(registeredPlayer);
+            if (registeredPlayer != null)
+            {
+                playerAccount.UpdateAccountInfo(registeredPlayer);
 
-            Navigation.NavigateTo("");
+                Navigation.NavigateTo("");
+            }
+
+            errorText = "An error occured!";
+
         }
         else
         {

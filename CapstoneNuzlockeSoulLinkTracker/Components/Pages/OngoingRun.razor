@@ -14,31 +14,127 @@
             }
         </div>
 
+        <div class="row m-1">
+            <h2>@($"{run.RunCreatorName}\'s {run.RunName}")</h2>
+        </div>
+
+        <div class="row m-1">
+            <h2>@($"Pokemon {run.GameName}")</h2>
+        </div>
+
         @if (showSinglePlayer)
         {
             <div class="row">
                 @if (run.RunProgression.Any())
                 {
-                    <ul>
-                        @foreach(var step in run.RunProgression)
+                    @foreach(var step in run.RunProgression)
+                    {
+                        @if(step.RunPlayerId == runPlayerId)
                         {
-                            @if(step.GetType() == typeof(RouteModel))
-                            {
-                                <li>@((step as RouteModel).RouteName)</li>
-                            }
-                            else if (step.GetType() == typeof(BattleModel))
-                            {
-                                <li>@((step as BattleModel).BattleName)</li>
-                            }
+                            <div class="row m-1">
+                                <div class="col-1"></div>
+                                @if (step.IsRoute)
+                                {
+                                    <div class="col-4">
+                                        @($"{(step.ProgressionStep as RouteModel).RouteName}: ")
+                                    </div>
+                                    <div class="col-3">
+                                        <InputSelect @bind-Value="@step.DexNumber" @bind-Value:after="() => UpdateEncounter(step)">
+                                            <option>-Select a Pokemon-</option>
+                                            @foreach (var mon in pokemon)
+                                            {
+                                                <option value="@mon.DexNumber">@mon.PokemonName</option>
+                                            }
+                                        </InputSelect>
+                                    </div>
+                                    <div class="col-3">
+                                        <InputSelect @bind-Value="@step.IsAlive" @bind-Value:after="() => UpdateEncounter(step)">
+                                            <option value="">-Select a Status-</option>
+                                            <option value="true">Captured</option>
+                                            <option value="false">Dead</option>
+                                        </InputSelect>
+                                    </div>
+                                }
+                                else if (step.IsBattle)
+                                {
+                                    <div class="col-4 h4 m-3">
+                                        @($"{(step.ProgressionStep as BattleModel).BattleName} in {(step.ProgressionStep as BattleModel).BattleLocation}: ")
+                                    </div>
+                                    <div class="col h4 m-3">
+                                        @($"Level Cap: {(step.ProgressionStep as BattleModel).HighestLevel}")
+                                    </div>
+                                    <div class="col-3 h4 m-3">
+                                        <InputSelect @bind-Value="step.BattleCompleted" @bind-Value:after="() => UpdateBattle(step)">
+                                            <option value="false">-Battle Status-</option>
+                                            <option value="true">Complete</option>
+                                        </InputSelect>
+                                    </div>
+                                }
+                                <div class="col-1"></div>
+                            </div>
                         }
-                    </ul>
+                    }
                 }
+            </div>
+            <div class="row">
+                <div class="col-11"></div>
+                <div class="col">
+                    <button class="btn pkmn-form-btn" @onclick="() => CompleteRun()">Complete Run</button>
+                </div>
             </div>
         }
         else
         {
             <div class="row">
 
+            </div>
+
+            <div class="row">
+                <div class="row">
+                    <div class="col-2"></div>
+                    @foreach (var player in run.RunPlayers)
+                    {
+                        <div class="col h4">
+                            @player.PlayerName
+                        </div>
+                    }
+                    <div class="col-2 h4">
+                        Status
+                    </div>
+                </div>
+                @foreach (var group in run.GroupedRunProgression)
+                {
+                    <div class="row">
+                        @if (group.First().IsRoute)
+                        {
+                            <div class="col-2 ms-2">
+                                @($"{(group.Key as RouteModel).RouteName}: ")
+                            </div>
+                            @foreach (var player in group)
+                            {
+                                <div class="col">
+                                    @player.PokemonName
+                                </div>
+                            }
+                            <div class="col-2">
+                                @GetEncounterStatusMessage(group)
+                            </div>
+                        }
+                        else if (group.First().IsBattle)
+                        {
+                            <div class="col-3 h4 m-3">
+                                @($"{(group.Key as BattleModel).BattleName} in {(group.Key as BattleModel).BattleLocation}: ")
+                            </div>
+                            <div class="col-5"></div>
+                            <div class="col-2 h4 m-3">
+                                @($"Level Cap: {(group.Key as BattleModel).HighestLevel}")
+                            </div>
+                            <div class="col-2 h4 m-3">
+                                @GetBattleStatusMessage(group)
+                            </div>
+                        }
+                    </div>
+                }
             </div>
         }
     </div>
@@ -58,11 +154,14 @@ else
 
     RunModel run = new RunModel();
 
+    List<PokemonModel> pokemon = new List<PokemonModel>();
+
     protected override async Task OnInitializedAsync()
     {
         if (playerAccount.Username != null)
         {
-            run = await ongoingRunsData.GetFullRunDetailsFromId(RunId);
+            run = await GetUpdatedRun();
+            pokemon = await ongoingRunsData.GetPokemon();
             if(run != null)
             {
                 runPlayerId = run.RunPlayers.Find(x => x.PlayerId == playerAccount.Id).RunPlayerId;
@@ -70,13 +169,69 @@ else
         }
     }
 
+    private async Task<RunModel> GetUpdatedRun()
+    {
+        return await ongoingRunsData.GetFullRunDetailsFromId(RunId);
+    }
+
     private async Task ChangeShownState(bool showSP)
     {
         if (showSP)
             showSinglePlayer = true;
         else
+        {
+            run = await GetUpdatedRun();
             showSinglePlayer = false;
+        }
 
         await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task UpdateEncounter(RunStepModel step)
+    {
+        await ongoingRunsData.SaveEncounterData(step.RunEncounterId, step.DexNumber, step.IsAlive);
+
+        run = await GetUpdatedRun();
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task UpdateBattle(RunStepModel step)
+    {
+        await ongoingRunsData.SaveBattleData(step.RunBattleId, step.BattleCompleted);
+
+        run = await GetUpdatedRun();
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task CompleteRun()
+    {
+        await ongoingRunsData.CompleteRun(RunId);
+
+        Navigation.NavigateTo("");
+    }
+
+    private string GetEncounterStatusMessage(IGrouping<IProgressionOrderable, RunStepModel> encounterGroup)
+    {
+        var encounterStatuses = encounterGroup.Select(eg => eg.IsAlive).ToList();
+
+        if (encounterStatuses.Contains(false))
+            return "Dead";
+
+        if (encounterStatuses.Contains(null))
+            return "";
+
+        return "Active";
+    }   
+
+    private string GetBattleStatusMessage(IGrouping<IProgressionOrderable, RunStepModel> battleGroup)
+    {
+        var battleStatuses = battleGroup.Select(bg => bg.BattleCompleted).ToList();
+
+        if (battleStatuses.Contains(false))
+            return "Unchallenged";
+
+        return "Defeated!";
     }
 }

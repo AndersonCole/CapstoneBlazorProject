@@ -29,21 +29,55 @@ public class RunModel
     }
     public List<RunBattleModel> RunBattles{ get; set; } = new List<RunBattleModel>();
     public List<RunEncounterModel> RunEncounters { get; set; } = new List<RunEncounterModel>();
-    public List<IProgressionOrderable> RunProgression
+    public List<RunStepModel> RunProgression
     {
         get
         {
+            //combines every encounter and battle into one list, and orders it by progression step
             if (RunEncounters.Count != 0 && RunBattles.Count != 0)
             {
-                List<IProgressionOrderable> combinedProgression = RunEncounters.Select(r => r.Route as IProgressionOrderable)
-                                                                               .Concat(RunBattles.Select(b => b.Battle as IProgressionOrderable))
-                                                                               .OrderBy(step => step.ProgressionOrder)
+                List<RunStepModel> combinedProgression = RunEncounters.Select(r => new RunStepModel { 
+                                                                                                        ProgressionStep = r.Route,
+                                                                                                        RunPlayerId = r.RunPlayerId,
+                                                                                                        IsRoute = true,
+                                                                                                        RunEncounterId = r.EncounterId,
+                                                                                                        DexNumber = r.DexNumber,
+                                                                                                        PokemonName = r.PokemonName,
+                                                                                                        IsAlive = r.IsAlive,
+                                                                                                        IsBattle = false
+                                                                                                    })
+                                                                               .Concat(RunBattles.Select(b => new RunStepModel { 
+                                                                                                                                    ProgressionStep = b.Battle,
+                                                                                                                                    RunPlayerId = b.RunPlayerId,
+                                                                                                                                    IsRoute = false,
+                                                                                                                                    IsBattle = true,
+                                                                                                                                    RunBattleId = b.RunBattleId,
+                                                                                                                                    BattleCompleted = b.BattleCompleted
+                                                                                                                               }))
+                                                                               .OrderBy(step => step.ProgressionStep.ProgressionOrder)
+                                                                               .ThenBy(step => step.RunPlayerId)
                                                                                .ToList();
 
                 return combinedProgression;
             }
             else
-                return new List<IProgressionOrderable>();
+                return new List<RunStepModel>();
+        }
+    }
+    public List<IGrouping<IProgressionOrderable, RunStepModel>> GroupedRunProgression
+    {
+        get
+        {
+            //groups every step by the progression step, so theres groups of progression steps for each run player
+            if (RunProgression.Count != 0)
+            {
+                var groupedProgression = RunProgression.GroupBy(step => step.ProgressionStep)
+                                         .ToList();
+
+                return groupedProgression;
+            }
+            else
+                return new List<IGrouping<IProgressionOrderable, RunStepModel>>();
         }
     }
     public List<RunChatModel> RunChatMessages { get; set; } = new List<RunChatModel>();

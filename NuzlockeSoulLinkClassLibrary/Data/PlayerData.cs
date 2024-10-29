@@ -76,29 +76,6 @@ public class PlayerData
         return null;
     }
 
-    // TODO: Testing data, DELETE THIS!!!
-    //public async Task<List<RunBattleModel>> GetRunBattles(int runId)
-    //{
-    //    string sql = "spGetBattlesFromRunId";
-
-    //    string splitOn = "battle_id";
-
-    //    var parameters = new
-    //    {
-    //        id = runId
-    //    };
-
-    //    Func<RunBattleModel, BattleModel, RunBattleModel> lambda = (runBattle, battle) =>
-    //    {
-    //        runBattle.Battle = battle;
-    //        return runBattle;
-    //    };
-
-    //    var players = await _db.LoadNestedData<RunBattleModel, BattleModel, dynamic>(sql, parameters, lambda, splitOn);
-
-    //    return players;
-    //}
-
     /// <summary>
     /// Hashes the password using BCrypt
     /// </summary>

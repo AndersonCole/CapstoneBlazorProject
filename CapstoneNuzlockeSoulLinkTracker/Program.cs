@@ -10,7 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-//TODO: add all services here
+//Add all services here
 builder.Services.AddTransient<ISqlAccess, SqlAccess>();
 builder.Services.AddScoped<PlayerAccount>();
 builder.Services.AddScoped<NavMenuData>();

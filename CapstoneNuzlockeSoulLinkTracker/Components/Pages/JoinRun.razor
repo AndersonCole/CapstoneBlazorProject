@@ -27,7 +27,7 @@
 
             <div class="form-group row mt-3">
                 <label for="password">Password: </label>
-                <InputText id="password" @bind-Value="joinRequest.Password" class="pkmn-fields col-sm-2 ms-2" />
+                <InputText id="password" type="password" @bind-Value="joinRequest.Password" class="pkmn-fields col-sm-2 ms-2" />
             </div>
 
             <div class="row">
@@ -67,16 +67,16 @@ else
 
     private async Task JoinOngoingRun()
     {
-        //TODO: Make join run code once runs page is more fleshed out
-        var joinedRun = false;
+        var joinMessage = await joinRunsData.JoinRun(run, joinRequest.Password, playerAccount.Id);
 
-        if (joinedRun)
+        if (joinMessage == "Success")
         {
-            Navigation.NavigateTo("/run/" + run.RunId);
+            Navigation.NavigateTo("run/" + run.RunId);
         }
         else
         {
-            errorText = "Password to join was incorrect!";
+            errorText = joinMessage;
+            await InvokeAsync(StateHasChanged);
         }
     }
 }

@@ -6,12 +6,16 @@ using System.Threading.Tasks;
 
 namespace NuzlockeSoulLinkClassLibrary.Models;
 
-public class RunEncounterModel
+public class RunStepModel
 {
-    public int EncounterId { get; set; }
+    public IProgressionOrderable ProgressionStep { get; set; }
     public int RunPlayerId { get; set; }
-    public RouteModel Route { get; set; }
+    public bool IsRoute { get; set; }
+    public int RunEncounterId { get; set; }
     public int DexNumber { get; set; }
     public string PokemonName { get; set; }
     public bool? IsAlive { get; set; }
+    public bool IsBattle { get; set; }
+    public int RunBattleId { get; set; }
+    public bool BattleCompleted { get; set; }
 }

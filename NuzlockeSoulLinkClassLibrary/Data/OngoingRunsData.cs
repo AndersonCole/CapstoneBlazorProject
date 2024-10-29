@@ -114,4 +114,51 @@ public class OngoingRunsData
 
         return messages;
     }
+
+    public async Task<List<PokemonModel>> GetPokemon()
+    {
+        string sql = "spGetPokemon";
+
+        var pokemon = await _db.LoadData<PokemonModel, dynamic>(sql, new { });
+
+        return pokemon.ToList();
+    }
+
+    public async Task SaveEncounterData(int runEncounterId, int? dexNum, bool? isAlive)
+    {
+        string sql = "spUpdateEncounter";
+
+        var parameters = new
+        {
+            runEncounterId,
+            dexNum,
+            isAlive
+        };
+
+        await _db.SaveData<dynamic>(sql, parameters);
+    }
+
+    public async Task SaveBattleData(int runBattleId, bool? isComplete)
+    {
+        string sql = "spUpdateBattle";
+
+        var parameters = new
+        {
+            isComplete
+        };
+
+        await _db.SaveData<dynamic>(sql, parameters);
+    }
+
+    public async Task CompleteRun(int runId)
+    {
+        string sql = "spCompleteRun";
+
+        var parameters = new
+        {
+            runId
+        };
+
+        await _db.SaveData<dynamic>(sql, parameters);
+    }
 }
