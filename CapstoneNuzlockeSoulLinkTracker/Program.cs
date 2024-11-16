@@ -12,6 +12,7 @@ builder.Services.AddRazorComponents()
 
 //Add all services here
 builder.Services.AddTransient<ISqlAccess, SqlAccess>();
+builder.Services.AddScoped<AdminData>();
 builder.Services.AddScoped<PlayerAccount>();
 builder.Services.AddScoped<NavMenuData>();
 builder.Services.AddScoped<PokemonData>();

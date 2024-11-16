@@ -1,0 +1,89 @@
+﻿@page "/admin"
+@inject PlayerAccount playerAccount
+@inject NavigationManager Navigation
+@inject AdminData adminData
+
+@if (playerAccount.Username != null)
+{
+    @if (playerAccount.IsAdmin)
+    {
+        @if (showGens)
+        {
+            <AdminGens OnBack="ResetState" />
+        }
+        else if (showGames)
+        {
+            <AdminGames OnBack="ResetState" />
+        }
+        else if (showGameProgression)
+        {
+            <AdminGameProgression OnBack="ResetState" />
+        }
+        else
+        {
+            <div class="row">
+                <div class="col-2"></div>
+                <div class="col-2">
+                    <button @onclick="EditGens" class="btn pkmn-form-btn">Edit Gens</button>
+                </div>
+                <div class="col-1"></div>
+                <div class="col-2">
+                    <button @onclick="EditGames" class="btn pkmn-form-btn">Edit Games</button>
+                </div>
+                <div class="col-1"></div>
+                <div class="col-2">
+                    <button @onclick="EditGameProgression" class="btn pkmn-form-btn">Edit Game Progression</button>
+                </div>
+                <div class="col-2"></div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="col-3"></div>
+        <div class="col-6 h3">
+            You do not have permission to view this page!
+        </div>
+        <div class="col-3"></div>
+    }
+}
+else
+{
+    <NotLoggedIn />
+}
+
+@code {
+    bool showGens = false;
+    bool showGames = false;
+    bool showGameProgression = false;
+
+    private async Task EditGens()
+    {
+        showGens = true;
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task EditGames()
+    {
+        showGames = true;
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task EditGameProgression()
+    {
+        showGameProgression = true;
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task ResetState()
+    {
+        showGens = false;
+        showGames = false;
+        showGameProgression = false;
+
+        await InvokeAsync(StateHasChanged);
+    }
+}

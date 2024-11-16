@@ -13,5 +13,4 @@ public class GameModel
     public string GameName { get; set; }
     public string Abbreviation { get; set; }
     public string Region { get; set; }
-
 }

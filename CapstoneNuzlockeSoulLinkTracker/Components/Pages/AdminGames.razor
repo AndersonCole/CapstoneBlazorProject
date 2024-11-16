@@ -1,0 +1,212 @@
+﻿@inject AdminData adminData
+
+<div class="row">
+    <div class="col-1">
+        <button @onclick="BackToAdmin" class="btn pkmn-form-btn">Back</button>
+    </div>
+    <div class="col-3">
+        <button @onclick="SaveChanges" class="btn pkmn-form-btn">Save Changes</button>
+        <button @onclick="DiscardChanges" class="btn pkmn-form-btn ms-3">Discard Changes</button>
+    </div>
+    <div class="col">
+        @if (errorText != null)
+        {
+            <p class="pkmn-error-txt">@errorText</p>
+        }
+        else if (successText != null)
+        {
+            <p class="pkmn-success-txt">@successText</p>
+        }
+    </div>
+    <div class="col-2">
+        <label for="gens" class="col-sm">Gen: </label>
+        <InputSelect id="gens" @bind-Value="selectedGen" class="pkmn-fields col-sm-8 ms-2">
+            @if (generations.Any())
+            {
+                <option value="">-</option>
+                @foreach (var gen in generations)
+                {
+                    <option value="@gen.GenId">Gen @gen.RomanNumeral</option>
+                }
+            }
+        </InputSelect>
+    </div>
+    <div class="col-1">
+        <button @onclick="LoadGameData" class="btn pkmn-form-btn">Load Data</button>
+    </div>
+    <div class="col-1"></div>
+</div>
+
+<div class="row mt-3">
+    @if (viewingGen)
+    {
+        @if (games.Any())
+        {
+            @foreach (var game in games)
+            {
+                @if (!game.ToBeDeleted)
+                {
+                    <div class="row">
+                        <div class="col-1"></div>
+                        <div class="col-3">
+                            <label class="col-sm-4">Game Name: </label>
+                            <InputText @bind-Value="game.Game.GameName" @bind-Value:after="() => ModifyGame(game)" class="pkmn-fields col-sm-7 ms-2" />
+                        </div>
+                        <div class="col"></div>
+                        <div class="col-2">
+                            <label class="col-sm-4">Region: </label>
+                            <InputText @bind-Value="game.Game.Region" @bind-Value:after="() => ModifyGame(game)" class="pkmn-fields col-sm-7 ms-2" />
+                        </div>
+                        <div class="col-2">
+                            <label class="col-sm-4">Abbreviation: </label>
+                            <InputText @bind-Value="game.Game.Abbreviation" @bind-Value:after="() => ModifyGame(game)" class="pkmn-fields col-sm-7 ms-2" />
+                        </div>
+                        <div class="col-1">
+                            <button @onclick="() => DeleteGame(game)" class="pkmn-error-txt">X</button>
+                        </div>
+                    </div>
+                }
+            }
+        }
+        <div class="row mt-3">
+            <div class="col-5"></div>
+            <div class="col-2">
+                <button @onclick="AddGame" class="btn pkmn-form-btn">Add New Game</button>
+            </div>
+            <div class="col-5"></div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public EventCallback OnBack { get; set; }
+
+    private string? errorText;
+
+    private string? successText;
+
+    private int? selectedGen = 0;
+
+    private int viewingGenId;
+
+    private bool viewingGen = false;
+
+    List<GenerationModel> generations = new List<GenerationModel>();
+
+    List<AdminGameModel> games = new List<AdminGameModel>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        generations = await adminData.GetGenerations();
+    }
+
+    private async Task LoadGameData()
+    {
+        if (selectedGen != null)
+        {
+            games = await adminData.GetGamesFromGen(selectedGen);
+
+            errorText = null;
+
+            viewingGenId = selectedGen ?? default(int);
+
+            viewingGen = true;
+
+            await InvokeAsync(StateHasChanged);
+        }
+        else
+        {
+            errorText = "Select a gen first!";
+        }
+    }
+
+    private async Task SaveChanges()
+    {
+        try
+        {
+
+            foreach (var game in games)
+            {
+                if (game.New)
+                {
+                    await adminData.CreateGame(game.Game);
+                }
+                else if (game.ToBeDeleted)
+                {
+                    await adminData.DeleteGame(game.Game.GameId);
+                }
+                else if (game.Modified)
+                {
+                    await adminData.ModifyGame(game.Game);
+                }
+            }
+
+            successText = "All Changes Saved!";
+            errorText = null;
+
+            games = await adminData.GetGamesFromGen(viewingGenId);
+        }
+        catch
+        {
+            errorText = "An error occured!";
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task DiscardChanges()
+    {
+        games = await adminData.GetGamesFromGen(viewingGenId);
+
+        errorText = "All Changes Discarded!";
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task ModifyGame(AdminGameModel game)
+    {
+        if (!game.New)
+        {
+            game.Modified = true;
+        }
+    }
+
+    private void AddGame()
+    {
+        games.Add(new AdminGameModel
+        {
+            Game = new GameModel
+            {
+                GenId = viewingGenId,
+                GameName = "",
+                Abbreviation = "",
+                Region = ""
+            },
+            New = true
+        });
+
+        successText = "New Game Staged!";
+    }
+
+    private async Task DeleteGame(AdminGameModel game)
+    {
+        if (!game.New)
+        {
+            game.ToBeDeleted = true;
+            game.Modified = false;
+
+            successText = "Game Deletion Staged!";
+        }
+        else
+        {
+            games.Remove(game);
+        }
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task BackToAdmin()
+    {
+        await OnBack.InvokeAsync();
+    }
+}

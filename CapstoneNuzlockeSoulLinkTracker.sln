@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CapstoneNuzlockeSoulLinkTra
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NuzlockeSoulLinkClassLibrary", "NuzlockeSoulLinkClassLibrary\NuzlockeSoulLinkClassLibrary.csproj", "{D32BB978-24C3-4510-9EF3-96AFAD9577A9}"
 EndProject
+Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "NuzlockeSoulLinkDB", "NuzlockeSoulLinkDB\NuzlockeSoulLinkDB.sqlproj", "{94ACA237-24E6-4578-A7CE-4E94860D505F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,12 @@ Global
 		{D32BB978-24C3-4510-9EF3-96AFAD9577A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D32BB978-24C3-4510-9EF3-96AFAD9577A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D32BB978-24C3-4510-9EF3-96AFAD9577A9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{94ACA237-24E6-4578-A7CE-4E94860D505F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94ACA237-24E6-4578-A7CE-4E94860D505F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94ACA237-24E6-4578-A7CE-4E94860D505F}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{94ACA237-24E6-4578-A7CE-4E94860D505F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94ACA237-24E6-4578-A7CE-4E94860D505F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{94ACA237-24E6-4578-A7CE-4E94860D505F}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

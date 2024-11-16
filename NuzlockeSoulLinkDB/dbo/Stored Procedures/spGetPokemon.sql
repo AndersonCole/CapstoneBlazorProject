@@ -1,0 +1,8 @@
+﻿CREATE PROCEDURE spGetPokemon
+AS
+BEGIN
+SET NOCOUNT ON
+SELECT *
+FROM pokemon
+ORDER BY dex_number DESC;
+END

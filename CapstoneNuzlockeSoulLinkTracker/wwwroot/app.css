@@ -11,7 +11,7 @@ html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     min-height: 100% !important;
     height: 100%;
-    overflow-y: hidden;
+    /*overflow-y: hidden;*/
 }
 
 a, .btn-link {
@@ -131,6 +131,10 @@ h1:focus {
 
 .pkmn-error-txt {
     color: #e50000;
+}
+
+.pkmn-success-txt {
+    color: #02bf02;
 }
 
 a.pkmn-link-red:link, a.pkmn-link-red:visited{

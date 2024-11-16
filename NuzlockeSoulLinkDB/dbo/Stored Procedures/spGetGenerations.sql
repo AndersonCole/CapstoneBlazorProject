@@ -1,0 +1,7 @@
+﻿CREATE PROCEDURE spGetGenerations
+AS
+BEGIN
+SET NOCOUNT ON
+SELECT *
+FROM generations
+END

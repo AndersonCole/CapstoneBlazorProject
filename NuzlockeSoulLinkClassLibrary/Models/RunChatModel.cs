@@ -9,9 +9,8 @@ namespace NuzlockeSoulLinkClassLibrary.Models;
 public class RunChatModel
 {
     public int ChatId { get; set; }
-    public int PlayerId { get; set; }
+    public int RunPlayerId { get; set; }
     public string PlayerName { get; set; }
-    public int RunId { get; set; }
     public string ChatMessage { get; set; }
     public DateTimeOffset TimeSent { get; set; }
 }

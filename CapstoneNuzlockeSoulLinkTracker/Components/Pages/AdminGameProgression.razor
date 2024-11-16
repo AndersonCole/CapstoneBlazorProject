@@ -1,0 +1,345 @@
+﻿@inject AdminData adminData
+
+<div class="row">
+    <div class="col-1">
+        <button @onclick="BackToAdmin" class="btn pkmn-form-btn">Back</button>
+    </div>
+    <div class="col-3">
+        <button @onclick="SaveChanges" class="btn pkmn-form-btn">Save Changes</button>
+        <button @onclick="DiscardChanges" class="btn pkmn-form-btn ms-3">Discard Changes</button>
+    </div>
+    <div class="col">
+        @if (errorText != null)
+        {
+            <p class="pkmn-error-txt">@errorText</p>
+        }
+        else if (successText != null)
+        {
+            <p class="pkmn-success-txt">@successText</p>
+        }
+    </div>
+    <div class="col-2">
+        <label for="gens" class="col-sm">Gen: </label>
+        <InputSelect id="gens" @bind-Value="selectedGen" class="pkmn-fields col-sm-8 ms-2">
+            @if (generations.Any())
+            {
+                <option value="">-</option>
+                @foreach (var gen in generations)
+                {
+                    <option value="@gen.GenId">Gen @gen.RomanNumeral</option>
+                }
+            }
+        </InputSelect>
+    </div>
+    <div class="col-2">
+        <label for="games" class="col-sm">Game: </label>
+        <InputSelect id="games" @bind-Value="selectedGameId" class="pkmn-fields col-sm-8 ms-2">
+            @if (games.Any() && selectedGen != null)
+            {
+                <option value="">-</option>
+                @foreach (var game in games)
+                {
+                    if (game.GenId == selectedGen)
+                    {
+                        <option value="@game.GameId">@game.GameName</option>
+                    }
+                }
+            }
+            else
+            {
+                <option value="">Select a Generation First!</option>
+            }
+        </InputSelect>
+    </div>
+    <div class="col-1">
+        <button @onclick="LoadGameData" class="btn pkmn-form-btn">Load Data</button>
+    </div>
+    <div class="col-1"></div>
+</div>
+
+<div class="row mt-3">
+    @if (viewingGame)
+    {
+        @if (gameProgression.Any())
+        {
+            @foreach (var step in gameProgression)
+            {
+                @if (!step.ToBeDeleted)
+                {
+                    <div class="row">
+                        <div class="col-1"></div>
+                        @if (step.IsRoute)
+                        {
+                            <div class="col-3">
+                                <label class="col-sm-4">Route Name: </label>
+                                <InputText @bind-Value="(step.ProgressionStep as RouteModel).RouteName" @bind-Value:after="() => ModifyStep(step)" class="pkmn-fields col-sm-7 ms-2" />
+                            </div>
+                            <div class="col"></div>
+                            <div class="col-1">
+                                <label class="col-sm-3">Order: </label>
+                                <InputNumber @bind-Value="step.ProgressionStep.ProgressionOrder" @bind-Value:after="() => ModifyStep(step)" class="pkmn-fields col-sm-5 ms-2" />
+                            </div>
+                            <div class="col-1">
+                                <button @onclick="() => DeleteStep(step)" class="pkmn-error-txt">X</button>
+                            </div>
+                        }
+                        else if (step.IsBattle)
+                        {
+                            <div class="col-2 mt-2 mb-2">
+                                <label class="col-sm-4">Battle Name: </label>
+                                <InputText @bind-Value="(step.ProgressionStep as BattleModel).BattleName" @bind-Value:after="() => ModifyStep(step)" class="pkmn-fields col-sm-7 ms-2" />
+                            </div>
+                            <div class="col-2 mt-2 mb-2">
+                                <label class="col-sm-3">Location: </label>
+                                <InputText @bind-Value="(step.ProgressionStep as BattleModel).BattleLocation" @bind-Value:after="() => ModifyStep(step)" class="pkmn-fields col-sm-8 ms-2" />
+                            </div>
+                            <div class="col-2 mt-2 mb-2">
+                                <label class="col-sm-4">Pkmn Used: </label>
+                                <InputText @bind-Value="(step.ProgressionStep as BattleModel).PokemonUsed" @bind-Value:after="() => ModifyStep(step)" class="pkmn-fields col-sm-7 ms-2" />
+                            </div>
+                            <div class="col-1 mt-2 mb-2">
+                                <label class="col-sm-3">LvCap: </label>
+                                <InputNumber @bind-Value="(step.ProgressionStep as BattleModel).HighestLevel" @bind-Value:after="() => ModifyStep(step)" class="pkmn-fields col-sm-5 ms-2" />
+                            </div>
+                            <div class="col-2 mt-2 mb-2">
+                                <label class="col-sm-4">Img Link: </label>
+                                <InputText @bind-Value="(step.ProgressionStep as BattleModel).ImageLink" @bind-Value:after="() => ModifyStep(step)" class="pkmn-fields col-sm-7 ms-2" />
+                            </div>
+                            <div class="col-1 mt-2 mb-2">
+                                <label class="col-sm-3">Order: </label>
+                                <InputNumber @bind-Value="step.ProgressionStep.ProgressionOrder" @bind-Value:after="() => ModifyStep(step)" class="pkmn-fields col-sm-5 ms-2" />
+                            </div>
+                            <div class="col-1 mt-2 mb-2">
+                                <button @onclick="() => DeleteStep(step)" class="pkmn-error-txt">X</button>
+                            </div>
+                        }
+                    </div>
+                }
+            }
+        }
+        <div class="row mt-3">
+            <div class="col-3"></div>
+            <div class="col-2">
+                <button @onclick="AddRoute" class="btn pkmn-form-btn">Add New Route</button>
+            </div>
+            <div class="col-2"></div>
+            <div class="col-2">
+                <button @onclick="AddBattle" class="btn pkmn-form-btn">Add New Battle</button>
+            </div>
+            <div class="col-3"></div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] 
+    public EventCallback OnBack { get; set; }
+
+    private string? errorText;
+
+    private string? successText;
+
+    private int? selectedGen = 0;
+
+    private int? selectedGameId;
+
+    private int viewingGameId;
+
+    private bool viewingGame = false;
+
+    List<GenerationModel> generations = new List<GenerationModel>();
+    List<GameModel> games = new List<GameModel>();
+
+    List<AdminGameStepModel> gameProgression = new List<AdminGameStepModel>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        generations = await adminData.GetGenerations();
+        games = await adminData.GetGames();
+    }
+
+    private async Task LoadGameData()
+    {
+        if (selectedGameId != null)
+        {
+            gameProgression = await adminData.GetOrderedGameProgression(selectedGameId);
+
+            errorText = null;
+
+            viewingGameId = selectedGameId ?? default(int);
+
+            viewingGame = true;
+
+            await InvokeAsync(StateHasChanged);
+        }
+        else
+        {
+            errorText = "Select a game first!";
+        }
+    }
+
+    private async Task ModifyStep(AdminGameStepModel step)
+    {
+        if (!step.New)
+        {
+            step.Modified = true;
+
+            gameProgression = gameProgression.OrderBy(step => step.ProgressionStep.ProgressionOrder).ToList();
+
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private void AddRoute()
+    {
+        gameProgression.Add(new AdminGameStepModel
+            {
+                ProgressionStep = new RouteModel
+                {
+                    GameId = viewingGameId,
+                    RouteName = "",
+                    ProgressionOrder = 100
+                },
+                IsRoute = true,
+                IsBattle = false,
+                New = true
+            });
+
+        successText = "New Route Staged!";
+    }
+
+    private void AddBattle()
+    {
+        gameProgression.Add(new AdminGameStepModel
+            {
+                ProgressionStep = new BattleModel
+                {
+                    GameId = viewingGameId,
+                    BattleName = "",
+                    BattleLocation = "",
+                    PokemonUsed = "",
+                    HighestLevel = 0,
+                    ImageLink = "",
+                    ProgressionOrder = 100
+                },
+                IsRoute = false,
+                IsBattle = true,
+                New = true
+            });
+
+        successText = "New Battle Staged!";
+    }
+
+    private async Task DeleteStep(AdminGameStepModel step)
+    {
+        if (!step.New)
+        {
+            step.ToBeDeleted = true;
+            step.Modified = false;
+
+            successText = "Step Deletion Staged!";
+        }
+        else
+        {
+            gameProgression.Remove(step);
+        }
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task SaveChanges()
+    {
+        if (checkProgressionOrder())
+        {
+            try
+            {
+
+                foreach (var step in gameProgression)
+                {
+                    if (step.New)
+                    {
+                        if (step.IsRoute)
+                        {
+                            await adminData.CreateRoute(step.ProgressionStep as RouteModel);
+                        }
+                        else if (step.IsBattle)
+                        {
+                            await adminData.CreateBattle(step.ProgressionStep as BattleModel);
+                        }
+                    }
+                    else if (step.ToBeDeleted)
+                    {
+                        if (step.IsRoute)
+                        {
+                            await adminData.DeleteRoute((step.ProgressionStep as RouteModel).RouteId);
+                        }
+                        else if (step.IsBattle)
+                        {
+                            await adminData.DeleteBattle((step.ProgressionStep as BattleModel).BattleId);
+                        }
+                    }
+                    else if (step.Modified)
+                    {
+                        if (step.IsRoute)
+                        {
+                            await adminData.ModifyRoute(step.ProgressionStep as RouteModel);
+                        }
+                        else if (step.IsBattle)
+                        {
+                            await adminData.ModifyBattle(step.ProgressionStep as BattleModel);
+                        }
+                    }
+                }
+
+                successText = "All Changes Saved!";
+                errorText = null;
+
+                gameProgression = await adminData.GetOrderedGameProgression(viewingGameId);
+            }
+            catch
+            {
+                errorText = "An error occured!";
+            }
+        }
+        else
+        {
+            errorText = "Progression Order isn't sequential!";
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private bool checkProgressionOrder()
+    {
+        int prevOrderNum = -1;
+        var sortedProgression = gameProgression.OrderBy(step => step.ProgressionStep.ProgressionOrder).ToList();
+        foreach (var step in sortedProgression)
+        {
+            if (!step.ToBeDeleted)
+            {
+                if (step.ProgressionStep.ProgressionOrder - 1 == prevOrderNum)
+                {
+                    prevOrderNum = step.ProgressionStep.ProgressionOrder;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private async Task DiscardChanges()
+    {
+        gameProgression = await adminData.GetOrderedGameProgression(viewingGameId);
+
+        errorText = "All Changes Discarded!";
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task BackToAdmin()
+    {
+        await OnBack.InvokeAsync();
+    }
+}
