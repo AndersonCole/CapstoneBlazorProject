@@ -1,4 +1,5 @@
 ﻿@page "/run/{RunId:int}"
+<PageTitle>@run.RunName</PageTitle>
 @inject PlayerAccount playerAccount
 @inject NavigationManager Navigation
 @inject OngoingRunsData ongoingRunsData
@@ -24,7 +25,7 @@
 
         @if (showSinglePlayer)
         {
-            <div class="row">
+            <div class="row pkmn-accent-body-style ms-1">
                 @if (run.RunProgression.Any())
                 {
                     @foreach(var step in run.RunProgression)
@@ -49,7 +50,7 @@
                                     </div>
                                     <div class="col-3">
                                         <InputSelect @bind-Value="@step.IsAlive" @bind-Value:after="() => UpdateEncounter(step)">
-                                            <option value="">-Select a Status-</option>
+                                            <option value="null">-Select a Status-</option>
                                             <option value="true">Captured</option>
                                             <option value="false">Dead</option>
                                         </InputSelect>
@@ -76,20 +77,18 @@
                     }
                 }
             </div>
-            <div class="row">
-                <div class="col-11"></div>
-                <div class="col">
-                    <button class="btn pkmn-form-btn" @onclick="() => CompleteRun()">Complete Run</button>
+            <div class="row pkmn-accent-body-style ms-1">
+                <div class="col-10"></div>
+                <div class="col-2">
+                    <button class="btn pkmn-form-btn" @onclick="CompleteRun">Complete Run</button>
                 </div>
             </div>
         }
         else
         {
-            <div class="row">
+            <br />
 
-            </div>
-
-            <div class="row">
+            <div class="row pkmn-accent-body-style ms-1">
                 <div class="row">
                     <div class="col-2"></div>
                     @foreach (var player in run.RunPlayers)

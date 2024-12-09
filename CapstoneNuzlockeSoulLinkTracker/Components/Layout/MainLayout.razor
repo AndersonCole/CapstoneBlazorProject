@@ -30,17 +30,11 @@
             <div class="sidebar float-start col-2">
                 <NavMenu />
             </div>
+        }
 
-            <article class="content float-start col-10 h-100">
-                @Body
-            </article>
-        }
-        else
-        {
-            <article class="content float-start h-100 w-100">
-                @Body
-            </article>
-        }
+        <article class="content float-start @(showNavMenu ? "col-10" : "w-100")">
+            @Body
+        </article>
     </main>
 </div>
 

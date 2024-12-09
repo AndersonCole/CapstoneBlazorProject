@@ -144,6 +144,7 @@ public class OngoingRunsData
 
         var parameters = new
         {
+            runBattleId,
             isComplete
         };
 
