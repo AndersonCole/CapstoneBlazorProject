@@ -9,15 +9,19 @@
 	@LastUpdated datetimeoffset
 )
 AS
-DECLARE @RunId int
+DECLARE @RunIdTable TABLE (run_id uniqueidentifier)
+DECLARE @RunId uniqueidentifier
 DECLARE @RunPlayerId int;
 BEGIN
 SET NOCOUNT ON
---creates run entry
+--creates run entry, has to be output into a table because its a GUID
 INSERT INTO runs(run_name, run_description, run_password, run_creator_id, max_players, game_id, created_date, last_updated, run_complete)
+OUTPUT INSERTED.run_id INTO @RunIdTable
 VALUES(@RunName, @RunDescription, @Password, @RunCreatorId, @MaxPlayers, @GameId, @CreatedDate, @LastUpdated, 0)
 
-SET @RunId = SCOPE_IDENTITY();
+--gets the created run_id GUID from the table
+SELECT @RunId = run_id
+FROM @RunIdTable
 
 --creates run_players entry
 INSERT INTO run_players (player_id, run_id)

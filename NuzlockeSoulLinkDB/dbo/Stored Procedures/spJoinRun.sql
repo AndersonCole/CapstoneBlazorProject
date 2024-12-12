@@ -1,6 +1,6 @@
 ﻿CREATE PROCEDURE [dbo].[spJoinRun] (
 	@PlayerId int,
-	@RunId int
+	@RunId uniqueidentifier
 )
 AS
 DECLARE @RunPlayerId int;

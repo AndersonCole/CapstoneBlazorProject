@@ -2,6 +2,9 @@
 
 namespace CapstoneNuzlockeSoulLinkTracker.ValidationModels;
 
+/// <summary>
+/// Validation model providing error messages for logging in
+/// </summary>
 public class PlayerLoginModel
 {
     [Required(ErrorMessage = "Username cannot be empty!")]

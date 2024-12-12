@@ -1,5 +1,5 @@
-﻿CREATE PROCEDURE spGetBattlesFromRunId (
-	@Id int
+﻿CREATE PROCEDURE [dbo].[spGetBattlesFromRunId] (
+	@RunId uniqueidentifier
 )
 AS
 BEGIN
@@ -8,5 +8,5 @@ SELECT rb.run_battle_id, rb.run_player_id, rb.pokemon_used, rb.battle_completed,
 FROM run_battles as rb
 JOIN run_players as rp ON rb.run_player_id = rp.run_player_id
 JOIN battles as b ON rb.battle_id = b.battle_id
-WHERE rp.run_id = @Id
+WHERE rp.run_id = @RunId
 END

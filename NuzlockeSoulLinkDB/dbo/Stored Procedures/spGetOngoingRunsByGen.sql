@@ -8,7 +8,7 @@ SELECT runs.run_id, runs.game_id, games.game_name, run_creator_id, p.username as
 FROM runs
 JOIN games ON runs.game_id = games.game_id
 JOIN players as p ON p.player_id = runs.run_creator_id 
-JOIN run_players as rp ON p.player_id = rp.player_id
+JOIN run_players as rp ON runs.run_id = rp.run_id
 WHERE run_complete = 0
 AND games.gen_id = @GenId
 ORDER BY runs.last_updated DESC;

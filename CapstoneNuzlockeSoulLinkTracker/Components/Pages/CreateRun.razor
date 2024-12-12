@@ -103,6 +103,10 @@ else
     List<GenerationModel> generations = new List<GenerationModel>();
     List<GameModel> games = new List<GameModel>();
 
+    /// <summary>
+    /// Gets the generation and game data on page load
+    /// </summary>
+    /// <returns></returns>
     protected override async Task OnInitializedAsync()
     {
         if (playerAccount.Username != null)
@@ -112,6 +116,11 @@ else
         }
     }
 
+    /// <summary>
+    /// OnValidSubmit, sends all the data the user entered to be created as a new run
+    /// Naviagtes to the new run after creation
+    /// </summary>
+    /// <returns></returns>
     private async Task CreateNewRun()
     {
         bool isDuplicate = await createRunsData.CheckDuplicateName(newRun.Name);
@@ -132,9 +141,16 @@ else
                     LastUpdated = currentTime
                 };
 
-            var createdRunId = await createRunsData.CreateNewRun(run);
+            try
+            {
+                var createdRunId = await createRunsData.CreateNewRun(run);
 
-            Navigation.NavigateTo("run/" + createdRunId);
+                Navigation.NavigateTo("run/" + createdRunId);
+            }
+            catch
+            {
+                errorText = "An error occured while creating the run!";
+            }
         }
         else
         {

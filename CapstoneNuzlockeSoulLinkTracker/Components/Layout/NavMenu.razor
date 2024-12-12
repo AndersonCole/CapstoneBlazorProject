@@ -18,12 +18,17 @@
 
         @if (runs.Any())
         {
+            <br />
+            <div class="nav-item px-3 ms-1 fw-bold">
+                -My Active Runs-
+            </div>
             @foreach (var run in runs)
             {
                 <div class="nav-item px-3">
-                    <NavLink class="nav-link" href="@($"run/{run.RunId}")">@run.RunName</NavLink>
+                    <NavLink class="nav-link" href="@($"run/{run.RunId.ToString()}")">@run.RunName</NavLink>
                 </div>
             }
+            <br />
         }
 
         @if (playerAccount.Username != null)
@@ -33,7 +38,15 @@
                 <div class="nav-item px-3">
                     <NavLink class="nav-link" href="admin">Admin Page</NavLink>
                 </div>
+                <br />
             }
+        }
+
+        @if (playerAccount.Username != null)
+        {
+            <div class="nav-item px-3">
+                <a class="nav-link" @onclick="LogOut" href="">Log Out</a>
+            </div>
         }
     </nav>
 </div>
@@ -41,11 +54,26 @@
 @code {
     List<RunModel> runs = new List<RunModel>();
 
+    /// <summary>
+    /// If the user's logged in, gets their runs
+    /// </summary>
+    /// <returns></returns>
     protected override async Task OnInitializedAsync()
     {
         if (playerAccount.Username != null)
         {
             runs = await navMenuData.GetRunsFromPlayerId(playerAccount.Id);
         }
+    }
+
+    /// <summary>
+    /// Logs the user out
+    /// </summary>
+    /// <returns></returns>
+    private async Task LogOut()
+    {
+        playerAccount.LogoutUser();
+
+        Navigation.NavigateTo("", true);
     }
 }

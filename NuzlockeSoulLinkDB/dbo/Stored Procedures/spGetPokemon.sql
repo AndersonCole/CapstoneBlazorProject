@@ -1,8 +1,8 @@
-﻿CREATE PROCEDURE spGetPokemon
+﻿CREATE PROCEDURE [dbo].[spGetPokemon]
 AS
 BEGIN
 SET NOCOUNT ON
 SELECT *
 FROM pokemon
-ORDER BY dex_number DESC;
+ORDER BY dex_number ASC;
 END

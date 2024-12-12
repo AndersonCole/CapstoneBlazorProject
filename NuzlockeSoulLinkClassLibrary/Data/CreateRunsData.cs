@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace NuzlockeSoulLinkClassLibrary.Data;
 
+/// <summary>
+/// Class for managing access to db data for the create run page
+/// </summary>
 public class CreateRunsData
 {
     private readonly ISqlAccess _db;
@@ -16,6 +19,10 @@ public class CreateRunsData
         _db = db;
     }
 
+    /// <summary>
+    /// Gets all generations
+    /// </summary>
+    /// <returns>A list of generation models</returns>
     public async Task<List<GenerationModel>> GetGenerations()
     {
         string sql = "spGetGenerations";
@@ -23,6 +30,10 @@ public class CreateRunsData
         return await _db.LoadData<GenerationModel, dynamic>(sql, new { });
     }
 
+    /// <summary>
+    /// gets all games
+    /// </summary>
+    /// <returns>A list of game model</returns>
     public async Task<List<GameModel>> GetGames()
     {
         string sql = "spGetGames";
@@ -30,6 +41,11 @@ public class CreateRunsData
         return await _db.LoadData<GameModel, dynamic>(sql, new { });
     }
 
+    /// <summary>
+    /// Gets a run by its name
+    /// </summary>
+    /// <param name="runName">The name of the run to get</param>
+    /// <returns>A RunModel</returns>
     public async Task<RunModel> GetRunByName(string runName)
     {
         string sql = "spGetRunFromName";
@@ -44,6 +60,11 @@ public class CreateRunsData
         return run.FirstOrDefault();
     }
 
+    /// <summary>
+    /// Checks if the name of a run is unique
+    /// </summary>
+    /// <param name="runName">The name of the run to check</param>
+    /// <returns>True if the run name is used, false if its unused</returns>
     public async Task<bool> CheckDuplicateName(string runName)
     {
         var run = await GetRunByName(runName);
@@ -55,7 +76,12 @@ public class CreateRunsData
         return false;
     }
 
-    public async Task<int> CreateNewRun(RunModel run)
+    /// <summary>
+    /// Creates a new run, and returns its id
+    /// </summary>
+    /// <param name="run">Details about the run to creates</param>
+    /// <returns>The run id GUID</returns>
+    public async Task<Guid> CreateNewRun(RunModel run)
     {
         string sql = "spCreateAndReturnRun";
 
@@ -73,7 +99,7 @@ public class CreateRunsData
             run.LastUpdated
         };
 
-        var createdRun = await _db.LoadData<int, dynamic>(sql, parameters);
+        var createdRun = await _db.LoadData<Guid, dynamic>(sql, parameters);
 
         return createdRun.FirstOrDefault();
     }

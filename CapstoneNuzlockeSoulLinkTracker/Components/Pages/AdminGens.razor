@@ -61,11 +61,19 @@
 
     List<AdminGenModel> generations = new List<AdminGenModel>();
 
+    /// <summary>
+    /// Gets generations on page load
+    /// </summary>
+    /// <returns></returns>
     protected override async Task OnInitializedAsync()
     {
         generations = await adminData.GetAdminGens();
     }
 
+    /// <summary>
+    /// Goes through every gen, and attempts to make db modifications to them
+    /// </summary>
+    /// <returns></returns>
     private async Task SaveChanges()
     {
         try
@@ -100,6 +108,10 @@
         await InvokeAsync(StateHasChanged);
     }
 
+    /// <summary>
+    /// Deletes all staged changes, resetting the state back to pre changes
+    /// </summary>
+    /// <returns></returns>
     private async Task DiscardChanges()
     {
         generations = await adminData.GetAdminGens();
@@ -109,6 +121,11 @@
         await InvokeAsync(StateHasChanged);
     }
 
+    /// <summary>
+    /// Stages a gen to be modified
+    /// </summary>
+    /// <param name="gen"></param>
+    /// <returns></returns>
     private async Task ModifyGen(AdminGenModel gen)
     {
         if (!gen.New)
@@ -117,6 +134,9 @@
         }
     }
 
+    /// <summary>
+    /// Stages a new gen to be added
+    /// </summary>
     private void AddGen()
     {
         generations.Add(new AdminGenModel
@@ -131,6 +151,11 @@
         successText = "New Gen Staged!";
     }
 
+    /// <summary>
+    /// Deletes a gen from the staged chnages list
+    /// </summary>
+    /// <param name="gen"></param>
+    /// <returns></returns>
     private async Task DeleteGen(AdminGenModel gen)
     {
         if (!gen.New)

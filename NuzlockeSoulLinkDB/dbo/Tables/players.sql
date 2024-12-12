@@ -5,6 +5,7 @@
     [created_date]   DATETIMEOFFSET (7) NULL,
     [completed_runs] INT                NULL,
     [is_admin]       BIT                NULL,
+    [last_win_time]  DATETIMEOFFSET (7) NULL,
     PRIMARY KEY CLUSTERED ([player_id] ASC)
 );
 

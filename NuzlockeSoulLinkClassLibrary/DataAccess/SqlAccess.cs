@@ -19,6 +19,14 @@ public class SqlAccess : ISqlAccess
         _config = config;
     }
 
+    /// <summary>
+    /// Loads data from a stored proc
+    /// </summary>
+    /// <typeparam name="T">Returned object type</typeparam>
+    /// <typeparam name="U">Parameters type</typeparam>
+    /// <param name="sql">Stored proc string</param>
+    /// <param name="parameters">Stored proc parameters</param>
+    /// <returns>A list of T objects</returns>
     public async Task<List<T>> LoadData<T, U>(string sql, U parameters)
     {
         string connectionString = _config.GetConnectionString(ConnectionStringName);
@@ -32,7 +40,7 @@ public class SqlAccess : ISqlAccess
     }
 
     /// <summary>
-    /// Loads an object from a stored proc, and allows for nested objects
+    /// Loads data from a stored proc, and allows for nested lists of objects within objects
     /// </summary>
     /// <typeparam name="T">Returned object type</typeparam>
     /// <typeparam name="U">Nested object type</typeparam>
@@ -41,7 +49,7 @@ public class SqlAccess : ISqlAccess
     /// <param name="parameters">Stored proc parameters</param>
     /// <param name="lambda">The function used to map the nested object</param>
     /// <param name="splitOn">Where the returned data is split for the nested object</param>
-    /// <returns></returns>
+    /// <returns>A list of T objects</returns>
     public async Task<List<T>> LoadNestedData<T, U, V>(string sql, V parameters, Func<T, U, T> lambda, string splitOn)
     {
         string connectionString = _config.GetConnectionString(ConnectionStringName);
@@ -54,6 +62,13 @@ public class SqlAccess : ISqlAccess
         }
     }
 
+    /// <summary>
+    /// Saves data to the db using a stored proc
+    /// </summary>
+    /// <typeparam name="T">Parameters type</typeparam>
+    /// <param name="sql">Stored proc string</param>
+    /// <param name="parameters">Stored proc parameters</param>
+    /// <returns></returns>
     public async Task SaveData<T>(string sql, T parameters)
     {
         string connectionString = _config.GetConnectionString(ConnectionStringName);

@@ -1,4 +1,4 @@
-﻿@page "/join/{RunId:int}"
+﻿@page "/join/{RunId:guid}"
 <PageTitle>Join @run.RunName</PageTitle>
 @inject PlayerAccount playerAccount
 @inject NavigationManager Navigation
@@ -53,7 +53,7 @@ else
 
 @code {
     [Parameter]
-    public int RunId { get; set; }
+    public Guid RunId { get; set; }
 
     private RunJoinModel joinRequest = new RunJoinModel();
 
@@ -61,11 +61,20 @@ else
 
     private string? errorText;
 
+    /// <summary>
+    /// Loads the run data on page load
+    /// </summary>
+    /// <returns></returns>
     protected override async Task OnInitializedAsync()
     {
         run = await joinRunsData.GetRunFromId(RunId);
     }
 
+    /// <summary>
+    /// OnValidSubmit, attempts to join the ongoing run. 
+    /// Lets the user know if it failed
+    /// </summary>
+    /// <returns></returns>
     private async Task JoinOngoingRun()
     {
         var joinMessage = await joinRunsData.JoinRun(run, joinRequest.Password, playerAccount.Id);

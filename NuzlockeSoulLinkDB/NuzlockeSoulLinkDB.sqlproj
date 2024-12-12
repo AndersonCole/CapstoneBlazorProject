@@ -109,5 +109,7 @@
     <Build Include="dbo\Stored Procedures\spDeleteBattle.sql" />
     <Build Include="dbo\Stored Procedures\spModifyRoute.sql" />
     <Build Include="dbo\Stored Procedures\spModifyBattle.sql" />
+    <Build Include="dbo\Stored Procedures\spUpdateWins.sql" />
+    <Build Include="dbo\Stored Procedures\spSendMessage.sql" />
   </ItemGroup>
 </Project>

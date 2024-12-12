@@ -7,13 +7,11 @@ Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.WebHost.UseKestrel(option => option.AddServerHeader = false);
-
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-//Add all services here
+//Adding all services used by dependency injection here
 builder.Services.AddTransient<ISqlAccess, SqlAccess>();
 builder.Services.AddScoped<AdminData>();
 builder.Services.AddScoped<PlayerAccount>();

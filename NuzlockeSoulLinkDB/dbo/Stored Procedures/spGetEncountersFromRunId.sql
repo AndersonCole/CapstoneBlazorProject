@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[spGetEncountersFromRunId] (
-	@Id int
+	@RunId uniqueidentifier
 )
 AS
 BEGIN
@@ -9,5 +9,5 @@ FROM run_encounters as re
 JOIN run_players as rp ON re.run_player_id = rp.run_player_id
 JOIN routes as r ON re.route_id = r.route_id
 LEFT JOIN pokemon as p ON re.dex_number = p.dex_number
-WHERE rp.run_id = @Id
+WHERE rp.run_id = @RunId
 END

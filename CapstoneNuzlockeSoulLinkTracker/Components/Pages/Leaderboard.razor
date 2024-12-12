@@ -36,6 +36,10 @@ else
 @code {
     List<LeaderboardModel> leaderboardUsers = new List<LeaderboardModel>();
 
+    /// <summary>
+    /// Loads the leaderboard data on page load
+    /// </summary>
+    /// <returns></returns>
     protected override async Task OnInitializedAsync()
     {
         if (playerAccount.Username != null)

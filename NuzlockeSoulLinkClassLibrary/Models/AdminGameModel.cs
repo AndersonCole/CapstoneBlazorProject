@@ -6,13 +6,33 @@ using System.Threading.Tasks;
 
 namespace NuzlockeSoulLinkClassLibrary.Models;
 
+/// <summary>
+/// Model for managing games from the admin page
+/// </summary>
 public class AdminGameModel : IEquatable<AdminGameModel>
 {
+    /// <summary>
+    /// The game model
+    /// </summary>
     public GameModel Game { get; set; }
+    /// <summary>
+    /// if the model has been newly added and needs to be inserted into the db
+    /// </summary>
     public bool New { get; set; } = false;
+    /// <summary>
+    /// if the model was modififed, and already existed in the db
+    /// </summary>
     public bool Modified { get; set; } = false;
+    /// <summary>
+    /// if the model is staged for deletion
+    /// </summary>
     public bool ToBeDeleted { get; set; } = false;
 
+    /// <summary>
+    /// Functions for equality checking
+    /// </summary>
+    /// <param name="other"></param>
+    /// <returns></returns>
     public bool Equals(AdminGameModel other)
     {
         if (other == null)

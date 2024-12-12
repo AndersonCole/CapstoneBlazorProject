@@ -32,7 +32,7 @@
                 <tbody>
                     @foreach(var run in runs)
                     {
-                        @if (run.HasOpenSlots)
+                        @if (run.HasOpenSlots && run.RunPlayers.Where(rp => rp.PlayerId == playerAccount.Id).Count() == 0)
                         {
                             <tr class="text-center">
                                 <td>@run.RunCreatorName</td>
@@ -63,6 +63,10 @@ else
 
     GenerationModel selectedGeneration;
 
+    /// <summary>
+    /// Gets generation and run data when the page loads
+    /// </summary>
+    /// <returns></returns>
     protected override async Task OnInitializedAsync()
     {
         if (playerAccount.Username != null)
@@ -72,6 +76,11 @@ else
         }
     }
 
+    /// <summary>
+    /// Selects the generation the user specifies
+    /// </summary>
+    /// <param name="generation">Model representing the selected generation</param>
+    /// <returns></returns>
     private async Task SelectGeneration(GenerationModel generation)
     {
         allGensSelected = false;
@@ -82,6 +91,10 @@ else
         await InvokeAsync(StateHasChanged);
     }
 
+    /// <summary>
+    /// Runs when the user selects the 'All' tab for generations
+    /// </summary>
+    /// <returns></returns>
     private async Task SelectAllGens()
     {
         allGensSelected = true;
@@ -97,7 +110,7 @@ else
         Navigation.NavigateTo("create");
     }
 
-    private void NavigateToJoinRun(int runId)
+    private void NavigateToJoinRun(Guid runId)
     {
         Navigation.NavigateTo("join/" + runId);
     }

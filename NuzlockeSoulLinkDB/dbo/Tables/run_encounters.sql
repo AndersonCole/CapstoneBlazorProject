@@ -3,7 +3,7 @@
     [run_player_id] INT NULL,
     [route_id]      INT NULL,
     [dex_number]    INT NULL,
-    [is_alive]      BIT NULL,
+    [is_alive]      INT NULL,
     PRIMARY KEY CLUSTERED ([encounter_id] ASC),
     CONSTRAINT [FK_RunEncounters_DexNumber] FOREIGN KEY ([dex_number]) REFERENCES [dbo].[pokemon] ([dex_number]),
     CONSTRAINT [FK_RunEncounters_Route] FOREIGN KEY ([route_id]) REFERENCES [dbo].[routes] ([route_id]),

@@ -96,11 +96,19 @@
 
     List<AdminGameModel> games = new List<AdminGameModel>();
 
+    /// <summary>
+    /// Gets generations on page load
+    /// </summary>
+    /// <returns></returns>
     protected override async Task OnInitializedAsync()
     {
         generations = await adminData.GetGenerations();
     }
 
+    /// <summary>
+    /// Loads all data for the selected game. Errors if a game isnt selected
+    /// </summary>
+    /// <returns></returns>
     private async Task LoadGameData()
     {
         if (selectedGen != null)
@@ -121,11 +129,14 @@
         }
     }
 
+    /// <summary>
+    /// Goes through every game, and attempts to make db modifications to them
+    /// </summary>
+    /// <returns></returns>
     private async Task SaveChanges()
     {
         try
         {
-
             foreach (var game in games)
             {
                 if (game.New)
@@ -155,6 +166,10 @@
         await InvokeAsync(StateHasChanged);
     }
 
+    /// <summary>
+    /// Deletes all staged changes, resetting the state back to pre changes
+    /// </summary>
+    /// <returns></returns>
     private async Task DiscardChanges()
     {
         games = await adminData.GetGamesFromGen(viewingGenId);
@@ -164,6 +179,11 @@
         await InvokeAsync(StateHasChanged);
     }
 
+    /// <summary>
+    /// Stages a game to be modified
+    /// </summary>
+    /// <param name="game"></param>
+    /// <returns></returns>
     private async Task ModifyGame(AdminGameModel game)
     {
         if (!game.New)
@@ -172,6 +192,9 @@
         }
     }
 
+    /// <summary>
+    /// Adds a new game to the list of staged changes
+    /// </summary>
     private void AddGame()
     {
         games.Add(new AdminGameModel
@@ -189,6 +212,11 @@
         successText = "New Game Staged!";
     }
 
+    /// <summary>
+    /// Removes a game from the staged changes list
+    /// </summary>
+    /// <param name="game"></param>
+    /// <returns></returns>
     private async Task DeleteGame(AdminGameModel game)
     {
         if (!game.New)

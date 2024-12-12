@@ -1,5 +1,5 @@
-﻿CREATE PROCEDURE spCompleteRun (
-	@RunId int
+﻿CREATE PROCEDURE [dbo].[spCompleteRun] (
+	@RunId uniqueidentifier
 )
 AS
 BEGIN

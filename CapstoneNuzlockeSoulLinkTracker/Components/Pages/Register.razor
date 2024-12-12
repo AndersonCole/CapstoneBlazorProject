@@ -44,9 +44,12 @@
 
     private string? errorText;
 
+    /// <summary>
+    /// Registers a new player, as long as they dont have a duplicate name to another user
+    /// </summary>
+    /// <returns></returns>
     private async Task RegisterPlayer()
     {
-
         bool isDuplicate = await playerData.CheckDuplicateUsername(newPlayer.Username);
 
         if (!isDuplicate)
@@ -68,7 +71,6 @@
             }
 
             errorText = "An error occured!";
-
         }
         else
         {

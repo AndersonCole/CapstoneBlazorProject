@@ -1,4 +1,4 @@
-﻿CREATE PROCEDURE spGetRunsFromPlayerId (
+﻿CREATE PROCEDURE [dbo].[spGetRunsFromPlayerId] (
 	@PlayerId int
 )
 AS
@@ -8,4 +8,5 @@ SELECT *
 FROM runs
 JOIN run_players ON runs.run_id = run_players.run_id
 WHERE player_id = @PlayerId
+AND runs.run_complete = 0
 END

@@ -1,4 +1,4 @@
-﻿@page "/run/{RunId:int}"
+﻿@page "/run/{RunId:guid}"
 <PageTitle>@run.RunName</PageTitle>
 @inject PlayerAccount playerAccount
 @inject NavigationManager Navigation
@@ -8,10 +8,11 @@
 {
     <div class="pkmn-accent-body">
         <div class="btn-group d-flex p-0 m-0" role="group">
-            <button class="btn flex-fill @(showSinglePlayer ? "pkmn-tab-btn-selected" : "pkmn-tab-btn")" @onclick="() => ChangeShownState(true)">Singleplayer</button>
+            <button class="btn flex-fill @(showSinglePlayer ? "pkmn-tab-btn-selected" : "pkmn-tab-btn")" @onclick="ShowSingleplayer">Singleplayer</button>
             @if(run.MaxPlayers > 1)
             {
-                <button class="btn flex-fill @(showSinglePlayer ? "pkmn-tab-btn" : "pkmn-tab-btn-selected")" @onclick="() => ChangeShownState(false)">Multiplayer</button>
+                <button class="btn flex-fill @(showMultiplayer ? "pkmn-tab-btn-selected" : "pkmn-tab-btn")" @onclick="ShowMultiplayer">Multiplayer</button>
+                <button class="btn flex-fill @(showChat ? "pkmn-tab-btn-selected" : "pkmn-tab-btn")" @onclick="ShowChat">Chat</button>
             }
         </div>
 
@@ -26,33 +27,48 @@
         @if (showSinglePlayer)
         {
             <div class="row pkmn-accent-body-style ms-1">
-                @if (run.RunProgression.Any())
+                @if (cachedRunStepModel.Any())
                 {
-                    @foreach(var step in run.RunProgression)
+                    @foreach (var step in cachedRunStepModel)
                     {
                         @if(step.RunPlayerId == runPlayerId)
                         {
-                            <div class="row m-1">
+                            <div class="row">
                                 <div class="col-1"></div>
                                 @if (step.IsRoute)
                                 {
-                                    <div class="col-4">
+                                    <div class="col-3">
                                         @($"{(step.ProgressionStep as RouteModel).RouteName}: ")
                                     </div>
-                                    <div class="col-3">
+                                    <div class="col-2">
+                                        <InputText @bind-Value="@step.SearchQuery" @bind-Value:after="() => FilterPokemon(step)" placeholder="Search for Pokemon..." />
+                                    </div>
+                                    <div class="col-2">
                                         <InputSelect @bind-Value="@step.DexNumber" @bind-Value:after="() => UpdateEncounter(step)">
-                                            <option>-Select a Pokemon-</option>
-                                            @foreach (var mon in pokemon)
+                                            @if (step.DexNumber != 0)
                                             {
-                                                <option value="@mon.DexNumber">@mon.PokemonName</option>
+                                                <option value="@step.DexNumber" selected>@step.PokemonName</option>
+                                            }
+                                            else if (step.FilteredPokemon.Count == 0)
+                                            {
+                                                <option value="0">-Search a Pokemon First!-</option>
+                                            }
+
+                                            @if (step.FilteredPokemon.Count > 0)
+                                            {
+                                                <option value="0">-Select a Pokemon-</option>
+                                                @foreach (var mon in step.FilteredPokemon)
+                                                {
+                                                    <option value="@mon.DexNumber">@mon.PokemonName</option>
+                                                }
                                             }
                                         </InputSelect>
                                     </div>
                                     <div class="col-3">
                                         <InputSelect @bind-Value="@step.IsAlive" @bind-Value:after="() => UpdateEncounter(step)">
-                                            <option value="null">-Select a Status-</option>
-                                            <option value="true">Captured</option>
-                                            <option value="false">Dead</option>
+                                            <option value="0">-Status-</option>
+                                            <option value="1">Captured</option>
+                                            <option value="2">Dead</option>
                                         </InputSelect>
                                     </div>
                                 }
@@ -67,7 +83,7 @@
                                     <div class="col-3 h4 m-3">
                                         <InputSelect @bind-Value="step.BattleCompleted" @bind-Value:after="() => UpdateBattle(step)">
                                             <option value="false">-Battle Status-</option>
-                                            <option value="true">Complete</option>
+                                            <option value="true">Victory!</option>
                                         </InputSelect>
                                     </div>
                                 }
@@ -77,14 +93,36 @@
                     }
                 }
             </div>
-            <div class="row pkmn-accent-body-style ms-1">
-                <div class="col-10"></div>
-                <div class="col-2">
-                    <button class="btn pkmn-form-btn" @onclick="CompleteRun">Complete Run</button>
+            @if(run.RunCreatorId == playerAccount.Id)
+            {
+                <div class="row pkmn-accent-body-style ms-1 mb-1">
+                    <div class="col-6"></div>
+                    <div class="col-3 align-content-center">
+                        @if (failingRun)
+                        {
+                            <span class="w-100">This will mark the run as ending in defeat... Are you sure?</span>
+                        }
+                        else if (winningRun)
+                        {
+                            <span class="w-100">This will mark the run as ending in victory! Are you sure?</span>
+                        }
+                    </div>
+                    <div class="col-3">
+                        @if (!failingRun && !winningRun)
+                        {
+                            <button class="btn pkmn-form-btn" @onclick="FailRun">Fail Run</button>
+                            <button class="btn pkmn-form-btn" @onclick="WinRun">Complete Run</button>
+                        }
+                        else
+                        {
+                            <button class="btn pkmn-form-btn" @onclick="CancelRunEnd">Cancel</button>
+                            <button class="btn pkmn-form-btn" @onclick="CompleteRun">Confirm</button>
+                        }
+                    </div>
                 </div>
-            </div>
+            }
         }
-        else
+        else if (showMultiplayer)
         {
             <br />
 
@@ -136,6 +174,30 @@
                 }
             </div>
         }
+        else if (showChat)
+        {
+            <div class="pkmn-header flex-grow-1 h-75 overflow-auto ms-2 mt-2 me-2">
+                @foreach (var message in run.RunChatMessages)
+                {
+                    <div class="d-flex mb-2 justify-content-start">
+                        <div class="d-flex p-2 rounded justify-content-between w-100">
+                            <span>@($"{message.PlayerName}: {message.ChatMessage}")</span>
+                            <span>@(message.TimeSent.LocalDateTime.ToString("yyyy-MM-dd h:mm tt"))</span>
+                        </div>
+                    </div>
+                }
+            </div>
+            <EditForm Model="chat" OnValidSubmit="SendChatMessage" autocomplete="off">
+                <DataAnnotationsValidator />
+                <div class="pkmn-header input-bar d-flex ms-2 mb-2 me-2">
+                    <InputText class="pkmn-form-fields form-control me-2" @bind-Value="chat.ChatMessage" placeholder="Type a message..." />
+                    <button type="submit" class="btn pkmn-form-btn">Send</button>
+                </div>
+                <div class="row">
+                    <ValidationSummary />
+                </div>
+            </EditForm>
+        }
     </div>
 }
 else
@@ -145,16 +207,31 @@ else
 
 @code {
     [Parameter]
-    public int RunId { get; set; }
+    public Guid RunId { get; set; }
 
     int runPlayerId;
 
     bool showSinglePlayer = true;
+    bool showMultiplayer = false;
+    bool showChat = false;
+
+    bool failingRun = false;
+    bool winningRun = false;
 
     RunModel run = new RunModel();
 
     List<PokemonModel> pokemon = new List<PokemonModel>();
 
+    List<RunStepModel> cachedRunStepModel = new List<RunStepModel>();
+
+    RunChatValidationModel chat = new RunChatValidationModel();
+
+    /// <summary>
+    /// Loads the run data, pokemon data
+    /// If the run isn't null, continues and gets the run player id for the current user, and gets a cachedVersion of the run step model
+    /// if this fails, it goes back to the active runs menu
+    /// </summary>
+    /// <returns></returns>
     protected override async Task OnInitializedAsync()
     {
         if (playerAccount.Username != null)
@@ -164,66 +241,139 @@ else
             if(run != null)
             {
                 runPlayerId = run.RunPlayers.Find(x => x.PlayerId == playerAccount.Id).RunPlayerId;
+                cachedRunStepModel = run.RunProgression;
+            }
+            else
+            {
+                Navigation.NavigateTo("");
             }
         }
     }
 
+    /// <summary>
+    /// Gets every part of the run model
+    /// </summary>
+    /// <returns></returns>
     private async Task<RunModel> GetUpdatedRun()
     {
         return await ongoingRunsData.GetFullRunDetailsFromId(RunId);
     }
 
-    private async Task ChangeShownState(bool showSP)
+    /// <summary>
+    /// Shows the singleplayer tab, hides any other previously selected ones
+    /// </summary>
+    /// <returns></returns>
+    private async Task ShowSingleplayer()
     {
-        if (showSP)
-            showSinglePlayer = true;
-        else
-        {
-            run = await GetUpdatedRun();
-            showSinglePlayer = false;
-        }
+        showSinglePlayer = true;
+        showMultiplayer = false;
+        showChat = false;
 
         await InvokeAsync(StateHasChanged);
     }
 
+    /// <summary>
+    /// Shows the multiplayer tab, hides any other previously selected ones
+    /// </summary>
+    /// <returns></returns>
+    private async Task ShowMultiplayer()
+    {
+        showSinglePlayer = false;
+        showMultiplayer = true;
+        showChat = false;
+
+        run = await GetUpdatedRun();
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    /// <summary>
+    /// Shows the chat tab, hides any other previously selected ones
+    /// </summary>
+    /// <returns></returns>
+    private async Task ShowChat()
+    {
+        showSinglePlayer = false;
+        showMultiplayer = false;
+        showChat = true;
+
+        run = await GetUpdatedRun();
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    /// <summary>
+    /// Updates any changed encounters in the db
+    /// </summary>
+    /// <param name="step"></param>
+    /// <returns></returns>
     private async Task UpdateEncounter(RunStepModel step)
     {
-        await ongoingRunsData.SaveEncounterData(step.RunEncounterId, step.DexNumber, step.IsAlive);
+        if (!run.RunComplete)
+        {
+            await ongoingRunsData.SaveEncounterData(step.RunEncounterId, step.DexNumber, step.IsAlive);
 
-        run = await GetUpdatedRun();
+            int progressionOrder = step.ProgressionStep.ProgressionOrder;
+            string searchQuery = step.SearchQuery;
+            List<PokemonModel> filteredPokemon = step.FilteredPokemon;
 
-        await InvokeAsync(StateHasChanged);
+            run = await GetUpdatedRun();
+
+            cachedRunStepModel = run.RunProgression;
+
+            var targetStep = cachedRunStepModel
+                            .FirstOrDefault(step => step.RunPlayerId == runPlayerId &&
+                                                    step.ProgressionStep.ProgressionOrder == progressionOrder);
+
+            targetStep.SearchQuery = searchQuery;
+            targetStep.FilteredPokemon = filteredPokemon;
+
+            await InvokeAsync(StateHasChanged);
+        }
     }
 
+    /// <summary>
+    /// Updates any changed battles in the db
+    /// </summary>
+    /// <param name="step"></param>
+    /// <returns></returns>
     private async Task UpdateBattle(RunStepModel step)
     {
-        await ongoingRunsData.SaveBattleData(step.RunBattleId, step.BattleCompleted);
+        if (!run.RunComplete)
+        {
+            await ongoingRunsData.SaveBattleData(step.RunBattleId, step.BattleCompleted);
 
-        run = await GetUpdatedRun();
+            run = await GetUpdatedRun();
 
-        await InvokeAsync(StateHasChanged);
+            cachedRunStepModel = run.RunProgression;
+
+            await InvokeAsync(StateHasChanged);
+        }
     }
 
-    private async Task CompleteRun()
-    {
-        await ongoingRunsData.CompleteRun(RunId);
-
-        Navigation.NavigateTo("");
-    }
-
+    /// <summary>
+    /// Gets the overall status of a link in multiplayer, based on the contents of the IsAlive field for each RunPlayers step
+    /// </summary>
+    /// <param name="encounterGroup"></param>
+    /// <returns></returns>
     private string GetEncounterStatusMessage(IGrouping<IProgressionOrderable, RunStepModel> encounterGroup)
     {
         var encounterStatuses = encounterGroup.Select(eg => eg.IsAlive).ToList();
 
-        if (encounterStatuses.Contains(false))
+        if (encounterStatuses.Contains(2))
             return "Dead";
 
-        if (encounterStatuses.Contains(null))
+        if (encounterStatuses.Contains(0))
             return "";
 
         return "Active";
     }   
 
+    /// <summary>
+    /// Gets the overall status of a battle for the multiplayer tab, based on whats in each RunPlayers BattleCompleted field for each step
+    /// </summary>
+    /// <param name="battleGroup"></param>
+    /// <returns></returns>
     private string GetBattleStatusMessage(IGrouping<IProgressionOrderable, RunStepModel> battleGroup)
     {
         var battleStatuses = battleGroup.Select(bg => bg.BattleCompleted).ToList();
@@ -232,5 +382,115 @@ else
             return "Unchallenged";
 
         return "Defeated!";
+    }
+
+    /// <summary>
+    /// Filters the list of options that can be selected based on the input a user typed in that row
+    /// </summary>
+    /// <param name="step"></param>
+    /// <returns></returns>
+    private async Task FilterPokemon(RunStepModel step)
+    {
+        if (!string.IsNullOrEmpty(step.SearchQuery))
+        {
+            step.FilteredPokemon = pokemon
+                .Where(pkmn => pkmn.PokemonName.StartsWith(step.SearchQuery, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            int progressionOrder = step.ProgressionStep.ProgressionOrder;
+            string searchQuery = step.SearchQuery;
+            List<PokemonModel> filteredPokemon = step.FilteredPokemon;
+
+            run = await GetUpdatedRun();
+
+            cachedRunStepModel = run.RunProgression;
+
+            var targetStep = cachedRunStepModel.FirstOrDefault(step => step.RunPlayerId == runPlayerId &&
+                                                               step.ProgressionStep.ProgressionOrder == progressionOrder);
+
+            targetStep.SearchQuery = searchQuery;
+            targetStep.FilteredPokemon = filteredPokemon;
+
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    /// <summary>
+    /// Sends a chat message for the run
+    /// </summary>
+    /// <returns></returns>
+    private async Task SendChatMessage()
+    {
+        if (!run.RunComplete)
+        {
+            await ongoingRunsData.SendRunMessage(runPlayerId, chat.ChatMessage);
+
+            chat.ChatMessage = "";
+
+            run.RunChatMessages = await ongoingRunsData.GetRunMessages(RunId);
+
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    /// <summary>
+    /// Stages the run for ending in defeat
+    /// </summary>
+    /// <returns></returns>
+    private async Task FailRun()
+    {
+        failingRun = true;
+        winningRun = false;
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    /// <summary>
+    /// Stages the run for ending in victory
+    /// </summary>
+    /// <returns></returns>
+    private async Task WinRun()
+    {
+        winningRun = true;
+        failingRun = false;
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    /// <summary>
+    /// Resets run win states
+    /// </summary>
+    /// <returns></returns>
+    private async Task CancelRunEnd()
+    {
+        failingRun = false;
+        winningRun = false;
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    /// <summary>
+    /// Marks the run as completed
+    /// If it was a win, also increments win count for any user who hasn't already won in the last 10 minutes
+    /// </summary>
+    /// <returns></returns>
+    private async Task CompleteRun()
+    {
+        await ongoingRunsData.CompleteRun(RunId);
+
+        if (winningRun)
+        {
+            foreach (RunPlayerModel player in run.RunPlayers)
+            {
+                DateTimeOffset lastWinTime = player.LastWinTime.ToUniversalTime();
+
+                if((DateTimeOffset.UtcNow - lastWinTime).TotalMinutes >= 10)
+                {
+                    await ongoingRunsData.UpdatePlayerCompletions(player.RunPlayerId);
+                }
+            }
+        }
+
+        Navigation.NavigateTo("");
     }
 }

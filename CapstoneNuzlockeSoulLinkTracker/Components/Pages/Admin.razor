@@ -58,6 +58,10 @@ else
     bool showGames = false;
     bool showGameProgression = false;
 
+    /// <summary>
+    /// Brings up the AdminGens sub componenet
+    /// </summary>
+    /// <returns></returns>
     private async Task EditGens()
     {
         showGens = true;
@@ -65,6 +69,10 @@ else
         await InvokeAsync(StateHasChanged);
     }
 
+    /// <summary>
+    /// Brings up the AdminGames sub componenet
+    /// </summary>
+    /// <returns></returns>
     private async Task EditGames()
     {
         showGames = true;
@@ -72,6 +80,10 @@ else
         await InvokeAsync(StateHasChanged);
     }
 
+    /// <summary>
+    /// Brings up the AdminGameProgression sub componenet
+    /// </summary>
+    /// <returns></returns>
     private async Task EditGameProgression()
     {
         showGameProgression = true;
@@ -79,6 +91,10 @@ else
         await InvokeAsync(StateHasChanged);
     }
 
+    /// <summary>
+    /// Brings the admin user back to the select option screen
+    /// </summary>
+    /// <returns></returns>
     private async Task ResetState()
     {
         showGens = false;

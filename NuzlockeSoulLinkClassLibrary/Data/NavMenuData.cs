@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace NuzlockeSoulLinkClassLibrary.Data;
 
+/// <summary>
+/// Class for managing access to db data for the nav sidebar
+/// </summary>
 public class NavMenuData
 {
     private readonly ISqlAccess _db;
@@ -16,6 +19,11 @@ public class NavMenuData
         _db = db;
     }
 
+    /// <summary>
+    /// Gets any runs a player is in, for quick access in the nav menu
+    /// </summary>
+    /// <param name="playerId">Id of the player</param>
+    /// <returns></returns>
     public async Task<List<RunModel>> GetRunsFromPlayerId(int playerId)
     {
         string sql = "spGetRunsFromPlayerId";

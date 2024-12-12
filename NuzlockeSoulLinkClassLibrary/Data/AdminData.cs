@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 
 namespace NuzlockeSoulLinkClassLibrary.Data;
 
+/// <summary>
+/// Class for managing access to db data for the admin pages
+/// </summary>
 public class AdminData
 {
     private readonly ISqlAccess _db;
@@ -16,6 +19,11 @@ public class AdminData
     {
         _db = db;
     }
+
+    /// <summary>
+    /// Gets all generations
+    /// </summary>
+    /// <returns>A list of Generation Model</returns>
     public async Task<List<GenerationModel>> GetGenerations()
     {
         string sql = "spGetGenerations";
@@ -23,6 +31,10 @@ public class AdminData
         return await _db.LoadData<GenerationModel, dynamic>(sql, new { });
     }
 
+    /// <summary>
+    /// Gets all games
+    /// </summary>
+    /// <returns>A list of games</returns>
     public async Task<List<GameModel>> GetGames()
     {
         string sql = "spGetGames";
@@ -30,6 +42,11 @@ public class AdminData
         return await _db.LoadData<GameModel, dynamic>(sql, new { });
     }
 
+    /// <summary>
+    /// Gets all games and routes in a game, then combines them into one List ordered by ProgressionOrder
+    /// </summary>
+    /// <param name="gameId">Id of the game</param>
+    /// <returns></returns>
     public async Task<List<AdminGameStepModel>> GetOrderedGameProgression(int? gameId)
     {
         var gameRoutes = await GetGameRoutes(gameId);
@@ -50,13 +67,18 @@ public class AdminData
         return combinedProgression;
     }
 
+    /// <summary>
+    /// Gets all routes from a game
+    /// </summary>
+    /// <param name="gameId"></param>
+    /// <returns>A list of Route Models</returns>
     private async Task<List<RouteModel>> GetGameRoutes(int? gameId)
     {
         string sql = "spGetRoutesFromGameId";
 
         var parameters = new
         {
-            id = gameId
+            gameId
         };
 
         var routes = await _db.LoadData<RouteModel, dynamic>(sql, parameters);
@@ -64,13 +86,18 @@ public class AdminData
         return routes;
     }
 
+    /// <summary>
+    /// Gets all battles from a game
+    /// </summary>
+    /// <param name="gameId"></param>
+    /// <returns>A list of battle models</returns>
     private async Task<List<BattleModel>> GetGameBattles(int? gameId)
     {
         string sql = "spGetBattlesFromGameId";
 
         var parameters = new
         {
-            id = gameId
+            gameId
         };
 
         var battles = await _db.LoadData<BattleModel, dynamic>(sql, parameters);
@@ -78,6 +105,11 @@ public class AdminData
         return battles;
     }
 
+    /// <summary>
+    /// Inserts a new route into the database
+    /// </summary>
+    /// <param name="newRoute">The model containing all route details</param>
+    /// <returns></returns>
     public async Task CreateRoute(RouteModel newRoute)
     {
         string sql = "spCreateNewRoute";
@@ -92,6 +124,11 @@ public class AdminData
         await _db.SaveData<dynamic>(sql, parameters);
     }
 
+    /// <summary>
+    /// Inserts a new battle into the db
+    /// </summary>
+    /// <param name="newBattle">The model containing all battle details</param>
+    /// <returns></returns>
     public async Task CreateBattle(BattleModel newBattle)
     {
         string sql = "spCreateNewBattle";
@@ -110,6 +147,11 @@ public class AdminData
         await _db.SaveData<dynamic>(sql, parameters);
     }
 
+    /// <summary>
+    /// Updates a route already in the db
+    /// </summary>
+    /// <param name="route">The model containing all route details</param>
+    /// <returns></returns>
     public async Task ModifyRoute(RouteModel route)
     {
         string sql = "spModifyRoute";
@@ -124,6 +166,11 @@ public class AdminData
         await _db.SaveData<dynamic>(sql, parameters);
     }
 
+    /// <summary>
+    /// Updates a battle already in the db
+    /// </summary>
+    /// <param name="battle">The model containing all battle info</param>
+    /// <returns></returns>
     public async Task ModifyBattle(BattleModel battle)
     {
         string sql = "spModifyBattle";
@@ -142,37 +189,52 @@ public class AdminData
         await _db.SaveData<dynamic>(sql, parameters);
     }
 
-    public async Task DeleteRoute(int id)
+    /// <summary>
+    /// Deletes a route from the db
+    /// </summary>
+    /// <param name="routeId">Id of the route to be deleted</param>
+    /// <returns></returns>
+    public async Task DeleteRoute(int routeId)
     {
         string sql = "spDeleteRoute";
 
         var parameters = new
         {
-            RouteId = id
+            routeId
         };
 
         await _db.SaveData<dynamic>(sql, parameters);
     }
 
-    public async Task DeleteBattle(int id)
+    /// <summary>
+    /// Deletes a battle from the db
+    /// </summary>
+    /// <param name="battleId">Id of the battle to be deleted</param>
+    /// <returns></returns>
+    public async Task DeleteBattle(int battleId)
     {
         string sql = "spDeleteBattle";
 
         var parameters = new
         {
-            BattleId = id
+            battleId
         };
 
         await _db.SaveData<dynamic>(sql, parameters);
     }
 
+    /// <summary>
+    /// Gets all games based on the genId
+    /// </summary>
+    /// <param name="genId"></param>
+    /// <returns>A list of admin game models</returns>
     public async Task<List<AdminGameModel>> GetGamesFromGen(int? genId)
     {
         string sql = "spGetGamesFromGenId";
 
         var parameters = new
         {
-            id = genId
+            genId
         };
 
         var games = await _db.LoadData<GameModel, dynamic>(sql, parameters);
@@ -183,6 +245,11 @@ public class AdminData
         return adminGames;
     }
 
+    /// <summary>
+    /// Adds a new game into the db
+    /// </summary>
+    /// <param name="newGame">The model containing all game info</param>
+    /// <returns></returns>
     public async Task CreateGame(GameModel newGame)
     {
         string sql = "spCreateNewGame";
@@ -198,6 +265,11 @@ public class AdminData
         await _db.SaveData<dynamic>(sql, parameters);
     }
 
+    /// <summary>
+    /// Modifies an already existing game in the db
+    /// </summary>
+    /// <param name="game">The model containing all game info</param>
+    /// <returns></returns>
     public async Task ModifyGame(GameModel game)
     {
         string sql = "spModifyGame";
@@ -213,18 +285,27 @@ public class AdminData
         await _db.SaveData<dynamic>(sql, parameters);
     }
 
-    public async Task DeleteGame(int id)
+    /// <summary>
+    /// Deletes a game from the db
+    /// </summary>
+    /// <param name="gameId">Id of the game to be deleted</param>
+    /// <returns></returns>
+    public async Task DeleteGame(int gameId)
     {
         string sql = "spDeleteGame";
 
         var parameters = new
         {
-            GameId = id
+            gameId
         };
 
         await _db.SaveData<dynamic>(sql, parameters);
     }
 
+    /// <summary>
+    /// Gets all gens
+    /// </summary>
+    /// <returns>A list of admin gen models</returns>
     public async Task<List<AdminGenModel>> GetAdminGens()
     {
         string sql = "spGetGenerations";
@@ -238,6 +319,11 @@ public class AdminData
         return adminGens;
     }
 
+    /// <summary>
+    /// Adds a new gen to the db
+    /// </summary>
+    /// <param name="newGen">The model containing all info on the new gen</param>
+    /// <returns></returns>
     public async Task CreateGen(GenerationModel newGen)
     {
         string sql = "spCreateNewGen";
@@ -250,6 +336,11 @@ public class AdminData
         await _db.SaveData<dynamic>(sql, parameters);
     }
 
+    /// <summary>
+    /// Updates an existing gen in the db
+    /// </summary>
+    /// <param name="gen">The model containing all info on the gen</param>
+    /// <returns></returns>
     public async Task ModifyGen(GenerationModel gen)
     {
         string sql = "spModifyGen";
@@ -263,13 +354,18 @@ public class AdminData
         await _db.SaveData<dynamic>(sql, parameters);
     }
 
-    public async Task DeleteGen(int id)
+    /// <summary>
+    /// Deletes a gen from the db
+    /// </summary>
+    /// <param name="genId">Id of the gen to be deleted</param>
+    /// <returns></returns>
+    public async Task DeleteGen(int genId)
     {
         string sql = "spDeleteGen";
 
         var parameters = new
         {
-            GenId = id
+            genId
         };
 
         await _db.SaveData<dynamic>(sql, parameters);

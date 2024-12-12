@@ -4,7 +4,7 @@
     [primary_type]   NVARCHAR (10) NULL,
     [secondary_type] NVARCHAR (10) NULL,
     [evolves_from]   INT           NULL,
-    [evolve_into]    NVARCHAR (20) NULL,
+    [evolves_into]   NVARCHAR (50) NULL,
     PRIMARY KEY CLUSTERED ([dex_number] ASC)
 );
 

@@ -152,12 +152,20 @@
 
     List<AdminGameStepModel> gameProgression = new List<AdminGameStepModel>();
 
+    /// <summary>
+    /// Gets generations and games on page load
+    /// </summary>
+    /// <returns></returns>
     protected override async Task OnInitializedAsync()
     {
         generations = await adminData.GetGenerations();
         games = await adminData.GetGames();
     }
 
+    /// <summary>
+    /// Loads all progression data for the selected game. Errors if a game isnt selected
+    /// </summary>
+    /// <returns></returns>
     private async Task LoadGameData()
     {
         if (selectedGameId != null)
@@ -178,6 +186,11 @@
         }
     }
 
+    /// <summary>
+    /// For any step with changed data, as long as it wasn't newly created, stages it for db updates
+    /// </summary>
+    /// <param name="step"></param>
+    /// <returns></returns>
     private async Task ModifyStep(AdminGameStepModel step)
     {
         if (!step.New)
@@ -190,6 +203,9 @@
         }
     }
 
+    /// <summary>
+    /// Stages a new route to be added to the game progression
+    /// </summary>
     private void AddRoute()
     {
         gameProgression.Add(new AdminGameStepModel
@@ -208,6 +224,9 @@
         successText = "New Route Staged!";
     }
 
+    /// <summary>
+    /// Stages a new battle to be added to the game progression
+    /// </summary>
     private void AddBattle()
     {
         gameProgression.Add(new AdminGameStepModel
@@ -230,6 +249,11 @@
         successText = "New Battle Staged!";
     }
 
+    /// <summary>
+    /// Stages a step of progression to be deleted
+    /// </summary>
+    /// <param name="step"></param>
+    /// <returns></returns>
     private async Task DeleteStep(AdminGameStepModel step)
     {
         if (!step.New)
@@ -246,13 +270,16 @@
         await InvokeAsync(StateHasChanged);
     }
 
+    /// <summary>
+    /// Goes through every step item, and attempts to make db modifications to them
+    /// </summary>
+    /// <returns></returns>
     private async Task SaveChanges()
     {
         if (checkProgressionOrder())
         {
             try
             {
-
                 foreach (var step in gameProgression)
                 {
                     if (step.New)
@@ -308,6 +335,10 @@
         await InvokeAsync(StateHasChanged);
     }
 
+    /// <summary>
+    /// A check to make sure every step of progression is sequential, from 0 to any num
+    /// </summary>
+    /// <returns></returns>
     private bool checkProgressionOrder()
     {
         int prevOrderNum = -1;
@@ -329,6 +360,10 @@
         return true;
     }
 
+    /// <summary>
+    /// Deletes all staged changes, resetting the state back to pre changes
+    /// </summary>
+    /// <returns></returns>
     private async Task DiscardChanges()
     {
         gameProgression = await adminData.GetOrderedGameProgression(viewingGameId);

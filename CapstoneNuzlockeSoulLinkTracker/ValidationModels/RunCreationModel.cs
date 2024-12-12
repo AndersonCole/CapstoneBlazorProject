@@ -2,6 +2,9 @@
 
 namespace CapstoneNuzlockeSoulLinkTracker.ValidationModels;
 
+/// <summary>
+/// Validation model providing error messages for creating a run
+/// </summary>
 public class RunCreationModel
 {
     [Required(ErrorMessage = "Run Name cannot be empty!")]

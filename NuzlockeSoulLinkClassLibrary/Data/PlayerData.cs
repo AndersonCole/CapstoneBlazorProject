@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 
 namespace NuzlockeSoulLinkClassLibrary.Data;
 
+/// <summary>
+/// Class for managing access to db data for player info, used with the login and register pages
+/// </summary>
 public class PlayerData
 {
     private readonly ISqlAccess _db;
@@ -17,6 +20,11 @@ public class PlayerData
         _db = db;
     }
 
+    /// <summary>
+    /// Gets players from username
+    /// </summary>
+    /// <param name="username">The players username</param>
+    /// <returns>Player model</returns>
     public async Task<PlayerModel> GetPlayerByUsername(string username)
     {
         string sql = "spGetPlayerFromUsername";
@@ -31,6 +39,11 @@ public class PlayerData
         return player.FirstOrDefault();
     }
 
+    /// <summary>
+    /// Checks to make sure player usernames are unique
+    /// </summary>
+    /// <param name="username">Proposed username</param>
+    /// <returns>false if its available, true if taken</returns>
     public async Task<bool> CheckDuplicateUsername(string username)
     {
         var player = await GetPlayerByUsername(username);
@@ -42,6 +55,11 @@ public class PlayerData
         return false;
     }
 
+    /// <summary>
+    /// Registers a new player to the db
+    /// </summary>
+    /// <param name="player">model containing player info</param>
+    /// <returns>Newly registered player model</returns>
     public async Task<PlayerModel> RegisterNewPlayer(PlayerModel player)
     {
         string sql = "spRegisterPlayer";
@@ -60,6 +78,12 @@ public class PlayerData
         return await GetPlayerByUsername(player.Username);
     }
 
+    /// <summary>
+    /// Logs in a returning player
+    /// </summary>
+    /// <param name="username">Player username</param>
+    /// <param name="password">Unencrypted player password</param>
+    /// <returns>Logged in player model</returns>
     public async Task<PlayerModel> LoginReturningPlayer(string username, string password)
     {
         var player = await GetPlayerByUsername(username);

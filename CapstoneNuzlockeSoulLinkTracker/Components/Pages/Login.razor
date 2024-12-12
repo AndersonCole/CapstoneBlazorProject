@@ -39,6 +39,11 @@
 
     private string? errorText;
 
+    /// <summary>
+    /// Attempts to log the player in
+    /// Reloads the page, showing them the active runs oage after login
+    /// </summary>
+    /// <returns></returns>
     private async Task LoginPlayer()
     {
         var player = await playerData.LoginReturningPlayer(returningPlayer.Username, returningPlayer.Password);

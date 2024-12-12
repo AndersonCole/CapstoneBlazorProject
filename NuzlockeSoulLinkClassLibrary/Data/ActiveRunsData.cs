@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace NuzlockeSoulLinkClassLibrary.Data;
 
+/// <summary>
+/// Class for managing access to db data for the active runs page
+/// </summary>
 public class ActiveRunsData
 {
     private readonly ISqlAccess _db;
@@ -16,6 +19,10 @@ public class ActiveRunsData
         _db = db;
     }
 
+    /// <summary>
+    /// Gets all generations from the db
+    /// </summary>
+    /// <returns>List of </returns>
     public async Task<List<GenerationModel>> GetGenerations()
     {
         string sql = "spGetGenerations";
@@ -23,12 +30,17 @@ public class ActiveRunsData
         return await _db.LoadData<GenerationModel, dynamic>(sql, new { });
     }
 
+    /// <summary>
+    /// Gets all runs that haven't been completed yet
+    /// </summary>
+    /// <returns>A list of run models</returns>
     public async Task<List<RunModel>> GetOngoingRuns()
     {
         string sql = "spGetOngoingRuns";
 
         string splitOn = "run_player_id";
 
+        //loads a list of run player models into the runModel
         Func<RunModel, RunPlayerModel, RunModel> lambda = (run, run_player) =>
         {
             run.RunPlayers.Add(run_player);
@@ -47,6 +59,11 @@ public class ActiveRunsData
         return results;
     }
 
+    /// <summary>
+    /// Gets all runs in the specified gen that haven't been completed yet
+    /// </summary>
+    /// <param name="genId">Generation Id</param>
+    /// <returns>A list of run models</returns>
     public async Task<List<RunModel>> GetOngoingRunsByGen(int genId)
     {
         string sql = "spGetOngoingRunsByGen";
@@ -58,6 +75,7 @@ public class ActiveRunsData
             genId
         };
 
+        //loads a list of run player models into the runModel
         Func<RunModel, RunPlayerModel, RunModel> lambda = (run, run_player) =>
         {
             run.RunPlayers.Add(run_player);

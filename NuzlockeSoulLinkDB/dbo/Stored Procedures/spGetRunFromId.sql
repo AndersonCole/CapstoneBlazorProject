@@ -1,5 +1,5 @@
 ﻿CREATE PROCEDURE [dbo].[spGetRunFromId] (
-	@Id int
+	@RunId uniqueidentifier
 )
 AS
 BEGIN
@@ -9,5 +9,5 @@ FROM runs
 JOIN games ON runs.game_id = games.game_id
 JOIN players ON runs.run_creator_id = players.player_id
 JOIN run_players as rp ON players.player_id = rp.player_id
-WHERE runs.run_id = @Id
+WHERE runs.run_id = @RunId
 END

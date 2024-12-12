@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 
 namespace NuzlockeSoulLinkClassLibrary.Data;
 
+/// <summary>
+/// Class for managing access to db data for the join run page
+/// </summary>
 public class JoinRunsData
 {
     private readonly ISqlAccess _db;
@@ -17,7 +20,12 @@ public class JoinRunsData
         _db = db;
     }
 
-    public async Task<RunModel> GetRunFromId(int runId)
+    /// <summary>
+    /// Gets a run from its id
+    /// </summary>
+    /// <param name="runId">Id of the run to get</param>
+    /// <returns>A run model</returns>
+    public async Task<RunModel> GetRunFromId(Guid runId)
     {
         string sql = "spGetRunFromId";
 
@@ -25,9 +33,10 @@ public class JoinRunsData
 
         var parameters = new
         {
-            id = runId
+            runId
         };
 
+        //loads a list of run player models into the runModel
         Func<RunModel, RunPlayerModel, RunModel> lambda = (run, run_player) =>
         {
             run.RunPlayers.Add(run_player);
@@ -46,6 +55,13 @@ public class JoinRunsData
         return result.FirstOrDefault();
     }
 
+    /// <summary>
+    /// Attempts to join a run
+    /// </summary>
+    /// <param name="run">The run to be joined</param>
+    /// <param name="runPassword">User entered password to the run</param>
+    /// <param name="playerId">Id of the player whos joining</param>
+    /// <returns></returns>
     public async Task<string> JoinRun(RunModel run, string runPassword, int playerId)
     {
         if (run.HasOpenSlots)
@@ -59,7 +75,7 @@ public class JoinRunsData
                 var parameters = new
                 {
                     playerId,
-                    runId = run.RunId
+                    run.RunId
                 };
 
                 await _db.SaveData<dynamic>(sql, parameters);
